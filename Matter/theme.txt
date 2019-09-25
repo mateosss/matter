@@ -1,0 +1,42 @@
+# GRUB2 gfxmenu Linux Vimix theme
+# Designed for any resolution
+
+# Global Property
+title-text: ""
+# desktop-image: "background.png"
+desktop-color: "#263238"
+terminal-font: "GoogleSans Regular 32"
+terminal-box: "terminal_box_*.png"
+terminal-left: "0"
+terminal-top: "0"
+terminal-width: "100%"
+terminal-height: "100%"
+terminal-border: "0"
+
+# Show the boot menu
++ boot_menu {
+  left = 36%
+  top = 29%
+  width = 28%
+  height = 60%
+  item_font = "GoogleSans Regular 32"
+  item_color = "#cccccc"
+  selected_item_color = "#e91e63"
+  icon_width = 72
+  icon_height = 72
+  item_height = 72
+  item_spacing = 36
+  selected_item_pixmap_style = "select_*.png"
+}
+
+# Show a countdown message using the label component
++ label {
+  top = 82%
+  left = 35%
+  width = 30%
+  align = "center"
+  id = "__timeout__"
+  text = "Booting in %d seconds"
+  color = "#cccccc"
+  font = "GoogleSans Regular 32"
+}
