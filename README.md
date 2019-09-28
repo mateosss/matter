@@ -11,4 +11,4 @@ and/or submit pull requests.
 
 # Installation
 
-Just run `sudo ./set-matter.sh`.
+Download the repo as zip and run `sudo ./set-matter.sh`
