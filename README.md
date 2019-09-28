@@ -1,6 +1,8 @@
-# Matter 
+# Matter
 
-Grub theme with material design 2 aesthetic.
+Minimalist grub theme inspired by material design 2.
+
+![Matter Grub](demo.png)
 
 Based on https://github.com/vinceliuice/grub2-themes
 
