@@ -13,10 +13,15 @@ and/or submit pull requests.
 
 Download the repo as zip and run `sudo ./set-matter.sh`
 
-# Revert
+# Removal
 
 You can delete or comment this line in your `/etc/default/grub` file
 ```
 GRUB_THEME="/boot/grub/themes/Matter/theme.txt"
 ```
 And then `sudo update-grub`.
+
+# Contributing
+
+For adding icons or new functionalities to the script, read
+https://github.com/mateosss/matter/wiki
