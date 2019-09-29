@@ -12,3 +12,11 @@ and/or submit pull requests.
 # Installation
 
 Download the repo as zip and run `sudo ./set-matter.sh`
+
+# Revert
+
+You can delete or comment this line in your `/etc/default/grub` file
+```
+GRUB_THEME="/boot/grub/themes/Matter/theme.txt"
+```
+And then `sudo update-grub`.
