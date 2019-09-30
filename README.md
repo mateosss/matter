@@ -11,7 +11,8 @@ and/or submit pull requests.
 
 # Installation
 
-Download the repo as zip and run `sudo ./set-matter.sh`
+Download the repo as zip and run `sudo ./set-matter.sh`.
+Run `sudo ./set-matter.sh -p blue` for blue theme.
 
 # Removal
 

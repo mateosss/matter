@@ -7,6 +7,25 @@ THEME_NAME=Matter
 
 echo "Installing Matter grub theme..."
 
+# Parsing parameters
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -p|--pallete)
+    PALETTE="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    POSITIONAL+=("$1") # save it in an array for later
+    shift # past argument
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
 # Check command avalibility
 function has_command() {
   command -v $1 > /dev/null
@@ -28,6 +47,17 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
   echo "Installing ${THEME_NAME} theme..."
   [[ -d /boot/grub ]] && cp -a ${THEME_NAME} ${THEME_DIR}
   [[ -d /boot/grub2 ]] && cp -a ${THEME_NAME} ${THEME_DIR_2}
+
+  # Setting palette color
+  if [ "${PALETTE}" == "blue" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#2196f3"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "pink" ]; then
+    echo -e "Setting theme to pink"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#e91e63"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
 
   # Set theme
   echo -e "Setting ${THEME_NAME} as default..."
