@@ -13,7 +13,7 @@ do
 key="$1"
 
 case $key in
-    -p|--pallete)
+    -p|--palette)
     PALETTE="$2"
     shift # past argument
     shift # past value
