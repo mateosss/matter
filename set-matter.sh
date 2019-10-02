@@ -48,7 +48,7 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
   [[ -d /boot/grub ]] && cp -a ${THEME_NAME} ${THEME_DIR}
   [[ -d /boot/grub2 ]] && cp -a ${THEME_NAME} ${THEME_DIR_2}
 
-  # Setting palette color
+   # Setting palette color
   if [ "${PALETTE}" == "blue" ]; then
     echo -e "Setting theme to blue"
     sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#2196f3"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
@@ -57,6 +57,56 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
   if [ "${PALETTE}" == "pink" ]; then
     echo -e "Setting theme to pink"
     sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#e91e63"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "orange" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#E95420"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "green" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#35BF5C"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "white" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#FFFFFF"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "yellow" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#fdd835"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "brown" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#6d4c41"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "grey" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#757575"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "teal" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#00897b"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "cyan" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#00acc1"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "purple" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#5e35b1"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  fi
+
+  if [ "${PALETTE}" == "red" ]; then
+    echo -e "Setting theme to blue"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#e53935"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
   fi
 
   # Set theme
