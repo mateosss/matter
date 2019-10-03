@@ -24,7 +24,7 @@ And then run `sudo update-grub`.
 
 Alternatively if your distribution doesn't have that command you can run `sudo grub-mkconfig -o /boot/grub/grub.cfg`
 
-Running `sudo ./set_matter.sh` creates a directory in `/boot/grub/themes` called "Matter". If you want to delete the theme completely it is safe remove this directory after completing the steps above.
+Running `sudo ./set_matter.sh` creates a directory in `/boot/grub/themes` called "Matter". If you want to delete the theme completely it is safe to remove this directory after completing the steps above.
 
 # Contributing
 
