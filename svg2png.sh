@@ -32,7 +32,9 @@ for file in *.svg; do
         -scale 36x36 \
         -extent 72x72 \
         -gravity center \
+        -define png:color-type=6 \
         -background none \
+        -colorspace sRGB \
         -channel RGB \
         -threshold -1 \
         ${file} "${PNG_PATH}/${file%%.*}.png"
