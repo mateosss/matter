@@ -11,20 +11,25 @@ and/or submit pull requests.
 
 # Installation
 
-Download the repo as zip and run `sudo ./set-matter.sh`.
-Run `sudo ./set-matter.sh -p blue` for blue theme.
+Download the repo as a zip and run `sudo ./set-matter.sh`.
+
+## Font color
+
+`sudo ./set-matter.sh -p <color>` is something like `blue`, `red`, `deep-purple`
+and so on (read through `set-matter.sh` for other available colors).
+
 
 # Removal
 
-You can delete or comment this line in your `/etc/default/grub` file to disable the theme
+Comment or delete the following line from your `/etc/default/grub` file to
+disable the theme:
 ```
 GRUB_THEME="/boot/grub/themes/Matter/theme.txt"
 ```
-And then run `sudo update-grub`.
+And then run `sudo update-grub` (or `sudo grub-mkconfig -o /boot/grub/grub.cfg`
+if you don't have `update-grub`).
 
-Alternatively if your distribution doesn't have that command you can run `sudo grub-mkconfig -o /boot/grub/grub.cfg`
-
-Running `sudo ./set_matter.sh` creates a directory in `/boot/grub/themes` called "Matter". If you want to delete the theme completely it is safe to remove this directory after completing the steps above.
+You can delete `/boot/grub/themes/Matter` as well.
 
 # Contributing
 
