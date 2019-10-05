@@ -31,6 +31,12 @@ function has_command() {
   command -v $1 > /dev/null
 }
 
+# Set the theme 
+function set_theme() {
+    echo -e "Setting theme to ${PALETTE}"
+    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"'$1'"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+}
+
 echo "Checking for root access..."
 
 # Checking for root access and proceed if it is present
@@ -50,63 +56,51 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
 
   # Setting palette color
   if [ "${PALETTE}" == "red" ]; then
-    echo -e "Setting theme to red"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#F44336"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#F44336"
   fi
 
   if [ "${PALETTE}" == "pink" ]; then
-    echo -e "Setting theme to pink"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#E91E63"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#E91E63"
   fi
 
   if [ "${PALETTE}" == "purple" ]; then
-    echo -e "Setting theme to purple"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#9C27B0"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#9C27B0"
   fi
 
   if [ "${PALETTE}" == "deep-purple" ]; then
-    echo -e "Setting theme to deep purple"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#673AB7"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#673AB7"
   fi
 
   if [ "${PALETTE}" == "blue" ]; then
-    echo -e "Setting theme to blue"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#2196F3"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#2196F3"
   fi
 
   if [ "${PALETTE}" == "cyan" ]; then
-    echo -e "Setting theme to cyan"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#00BCD4"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#00BCD4"
   fi
 
   if [ "${PALETTE}" == "teal" ]; then
-    echo -e "Setting theme to teal"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#009688"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#009688"
   fi
 
   if [ "${PALETTE}" == "green" ]; then
-    echo -e "Setting theme to green"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#4CAF50"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#4CAF50"
   fi
 
   if [ "${PALETTE}" == "yellow" ]; then
-    echo -e "Setting theme to yellow"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#FFEB3B"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#FFEB3B"
   fi
 
   if [ "${PALETTE}" == "orange" ]; then
-    echo -e "Setting theme to orange"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#FF9800"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#FF9800"
   fi
 
   if [ "${PALETTE}" == "gray" ]; then
-    echo -e "Setting theme to gray"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#9E9E9E"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#9E9E9E"
   fi
 
   if [ "${PALETTE}" == "white" ]; then
-    echo -e "Setting theme to white"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#FFFFFF"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+    set_theme "#FFFFFF"
   fi
 
   # Set theme
