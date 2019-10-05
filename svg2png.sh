@@ -37,6 +37,7 @@ for file in *.svg; do
         -colorspace sRGB \
         -channel RGB \
         -threshold -1 \
+        -density 300 \
         ${file} "${PNG_PATH}/${file%%.*}.png"
 done
 
