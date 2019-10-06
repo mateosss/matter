@@ -13,7 +13,7 @@
    viewBox="0 0 72 72"
    id="svg4"
    sodipodi:docname="windows.svg"
-   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+   inkscape:version="0.92.4 5da689c313, 2019-01-14">
   <metadata
      id="metadata10">
     <rdf:RDF>
@@ -22,7 +22,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -37,20 +37,20 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1920"
-     inkscape:window-height="1019"
+     inkscape:window-width="1876"
+     inkscape:window-height="1027"
      id="namedview6"
      showgrid="false"
-     inkscape:zoom="11.5"
-     inkscape:cx="36"
+     inkscape:zoom="11.819444"
+     inkscape:cx="19.417156"
      inkscape:cy="36"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-x="44"
+     inkscape:window-y="25"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg4" />
   <path
      d="M 19.894737,35.052632 V 25.105263 L 31.263158,22.604211 V 34.882105 L 19.894737,35.052632 M 52.105263,18 V 34.578947 L 33.157895,34.863158 V 22.187368 L 52.105263,18 M 19.894737,36.947368 31.263158,37.117895 V 50.021053 L 19.894737,47.842105 V 36.947368 m 32.210526,0.473685 V 54 L 33.157895,50.381053 V 37.136842 Z"
      id="path2"
      inkscape:connector-curvature="0"
-     style="stroke-width:1.89473689;fill:#ffffff;fill-opacity:1" />
+     style="stroke-width:1.89473689;fill:#000000;fill-opacity:1" />
 </svg>

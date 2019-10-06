@@ -13,7 +13,7 @@
    viewBox="0 0 72 72"
    id="svg4"
    sodipodi:docname="settings.svg"
-   inkscape:version="0.92.3 (2405546, 2018-03-11)">
+   inkscape:version="0.92.4 5da689c313, 2019-01-14">
   <metadata
      id="metadata10">
     <rdf:RDF>
@@ -22,7 +22,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -37,20 +37,20 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1920"
-     inkscape:window-height="1019"
+     inkscape:window-width="1876"
+     inkscape:window-height="1027"
      id="namedview6"
      showgrid="false"
-     inkscape:zoom="11.5"
-     inkscape:cx="36"
+     inkscape:zoom="11.819444"
+     inkscape:cx="19.417156"
      inkscape:cy="36"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-x="44"
+     inkscape:window-y="25"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg4" />
   <path
      d="m 36.003976,42.3 a 6.3,6.3 0 0 1 -6.3,-6.3 6.3,6.3 0 0 1 6.3,-6.3 6.3,6.3 0 0 1 6.3,6.3 6.3,6.3 0 0 1 -6.3,6.3 m 13.374,-4.554 c 0.072,-0.576 0.126,-1.152 0.126,-1.746 0,-0.594 -0.054,-1.188 -0.126,-1.8 l 3.798,-2.934 c 0.342,-0.27 0.432,-0.756 0.216,-1.152 l -3.6,-6.228 c -0.216,-0.396 -0.702,-0.558 -1.098,-0.396 l -4.482,1.8 c -0.936,-0.702 -1.908,-1.314 -3.042,-1.764 l -0.666,-4.77 c -0.072,-0.432 -0.45,-0.756 -0.9,-0.756 h -7.2 c -0.45,0 -0.828,0.324 -0.9,0.756 l -0.666,4.77 c -1.134,0.45 -2.106,1.062 -3.042,1.764 l -4.482,-1.8 c -0.396,-0.162 -0.882,0 -1.098,0.396 l -3.6,6.228 c -0.234,0.396 -0.126,0.882 0.216,1.152 l 3.798,2.934 c -0.072,0.612 -0.126,1.206 -0.126,1.8 0,0.594 0.054,1.17 0.126,1.746 l -3.798,2.988 c -0.342,0.27 -0.45,0.756 -0.216,1.152 l 3.6,6.228 c 0.216,0.396 0.702,0.54 1.098,0.396 l 4.482,-1.818 c 0.936,0.72 1.908,1.332 3.042,1.782 l 0.666,4.77 c 0.072,0.432 0.45,0.756 0.9,0.756 h 7.2 c 0.45,0 0.828,-0.324 0.9,-0.756 l 0.666,-4.77 c 1.134,-0.468 2.106,-1.062 3.042,-1.782 l 4.482,1.818 c 0.396,0.144 0.882,0 1.098,-0.396 l 3.6,-6.228 c 0.216,-0.396 0.126,-0.882 -0.216,-1.152 z"
      id="path2"
      inkscape:connector-curvature="0"
-     style="stroke-width:1.79999995;fill:#ffffff;fill-opacity:1;opacity:0.99" />
+     style="stroke-width:1.79999995;fill:#000000;fill-opacity:1;opacity:0.99" />
 </svg>
