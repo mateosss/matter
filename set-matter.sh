@@ -77,22 +77,22 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
       sed -i -E "s/(selected_item_color = )\"#[0-9a-fA-F]+\"/\1\"${!PALETTE}\"/" "${THEME_DIR}/${THEME_NAME}/theme.txt"
   fi
 
+  # Setting available fonts
+  # List of supported fonts
+  supported_fonts=(poiret-one karla pattaya)
+
+  # Set the chosen font
+  if [[ ! " ${FONT} " == "  " ]] && [[ " ${supported_fonts[@] " =~ " ${FONT} " ]]; then
+      echo -e "Setting font to ${FONT}"
+      grub-mkfont "./Matter/fonts/${FONT}/${FONT}-regular.ttf"
+  fi
+
   # Set theme
   echo -e "Setting ${THEME_NAME} as default..."
   grep "GRUB_THEME=" /etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /etc/default/grub
 
   [[ -d /boot/grub ]] && echo "GRUB_THEME=\"${THEME_DIR}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
   [[ -d /boot/grub2 ]] && echo "GRUB_THEME=\"${THEME_DIR_2}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
-
-  # Setting available fonts
-  # List of supported fonts
-  supported_fonts=(poiret-one karla pattaya)
-
-  # Set the chosen font
-  if [[ ! " ${FONT} " == "  " ]]; then
-      echo -e "Setting font to ${FONT}"
-      grub-mkfont "./Matter/fonts/${FONT}/${FONT}-regular.ttf"
-  fi
 
   # Update grub config
   echo -e "Updating grub config..."
