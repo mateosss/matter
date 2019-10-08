@@ -89,6 +89,13 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
     grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
   fi
 
+  echo "Adding default icon..."
+  if has_command grub-mkconfig; then
+  sed -i -E -e "s/.*(menuentry|submenu) '[^']+'(( --class [^ ]+)+)?/& --class matter-default-icon/" /boot/grub/grub.cfg
+  elif has_command grub2-mkconfig; then
+  sed -i -E -e "s/.*(menuentry|submenu) '[^']+'(( --class [^ ]+)+)?/& --class matter-default-icon/" /boot/efi/EFI/fedora/grub.cfg
+  fi
+
   echo "Done."
 
 else
