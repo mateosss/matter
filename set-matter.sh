@@ -14,7 +14,7 @@ do
 key="$1"
 
 case $key in
-    -p|--pallete)
+    -p|--palette)
     PALETTE="$2"
     shift # past argument
     shift # past value
@@ -49,17 +49,30 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
   [[ -d /boot/grub ]] && cp -a ${SCRIPT_DIR}/${THEME_NAME} ${THEME_DIR}
   [[ -d /boot/grub2 ]] && cp -a ${SCRIPT_DIR}/${THEME_NAME} ${THEME_DIR_2}
 
-  # Setting palette color
-  if [ "${PALETTE}" == "blue" ]; then
-    echo -e "Setting theme to blue"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#2196f3"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
-  fi
+  # Setting palette color  
+  # List of supported colors
+  supported_colors=(red pink purple deep_purple blue cyan teal green yellow orange gray white)
+  
+  # Hex values for the supported colors
+  red="#F44336"
+  pink="#E91E63"
+  purple="#9C27B0"
+  deep_purple="#673AB7"
+  blue="#2196F3"
+  cyan="#00BCD4"
+  teal="#009688"
+  green="#4CAF50"
+  yellow="#FFEB3B"
+  orange="#FF9800"
+  gray="#9E9E9E"
+  white="#FFFFFF"
 
-  if [ "${PALETTE}" == "pink" ]; then
-    echo -e "Setting theme to pink"
-    sed -i -E 's/(selected_item_color = )"#[0-9a-fA-F]+"/\1"#e91e63"/' "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  # Set the chosen color if it is supported
+  if [[ " ${supported_colors[@]} " =~ " ${PALETTE} " ]]; then
+      echo -e "Setting theme to ${PALETTE}"
+      sed -i -E "s/(selected_item_color = )\"#[0-9a-fA-F]+\"/\1\"${!PALETTE}\"/" "${THEME_DIR}/${THEME_NAME}/theme.txt"
   fi
-
+  
   # Set theme
   echo -e "Setting ${THEME_NAME} as default..."
   grep "GRUB_THEME=" /etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /etc/default/grub
