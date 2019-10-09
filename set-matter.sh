@@ -4,6 +4,22 @@ THEME_DIR="/boot/grub/themes"
 THEME_DIR_2="/boot/grub2/themes"
 THEME_NAME="Matter"
 
+declare -A COLORS
+readonly COLORS=(
+  [RED]="#F44336"
+  [PINK]="#E91E63"
+  [PURPLE]="#9C27B0"
+  [DEEP_PURPLE]="#673AB7"
+  [BLUE]="#2196F3"
+  [CYAN]="#00BCD4"
+  [TEAL]="#009688"
+  [GREEN]="#4CAF50"
+  [YELLOW]="#FFEB3B"
+  [ORANGE]="#FF9800"
+  [GRAY]="#9E9E9E"
+  [WHITE]="#FFFFFF"
+)
+
 # Checking for root access
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root"
@@ -21,6 +37,14 @@ while [[ $# -gt 0 ]]; do
     PALETTE="$2"
     shift # past argument
     shift # past value
+    ;;
+  -h | --help)
+    echo "Usage: $0 [--laptop]"
+    echo
+    echo "Options:"
+    echo "  -p --palette      Changes color palette (Supported colors: ${!COLORS[*]})"
+    echo "  -h --help         Display this help and exit"
+    exit 0
     ;;
   *) # unknown option
     POSITIONAL+=("$1") # save it in an array for later
@@ -47,28 +71,10 @@ echo "Installing ${THEME_NAME} theme..."
 [[ -d /boot/grub ]] && cp -a ${THEME_NAME} ${THEME_DIR}
 [[ -d /boot/grub2 ]] && cp -a ${THEME_NAME} ${THEME_DIR_2}
 
-# Setting palette color
-# List of supported colors
-supported_colors=(red pink purple deep_purple blue cyan teal green yellow orange gray white)
-
-# Hex values of the supported colors
-red="#F44336"
-pink="#E91E63"
-purple="#9C27B0"
-deep_purple="#673AB7"
-blue="#2196F3"
-cyan="#00BCD4"
-teal="#009688"
-green="#4CAF50"
-yellow="#FFEB3B"
-orange="#FF9800"
-gray="#9E9E9E"
-white="#FFFFFF"
-
 # Set the chosen color if it is supported
-if [[ " ${supported_colors[@]} " =~ " ${PALETTE} " ]]; then
+if [[ "${!COLORS[*]}" =~ "${PALETTE}" ]]; then
   echo -e "Setting theme to ${PALETTE}"
-  sed -i -E "s/(selected_item_color = )\"#[0-9a-fA-F]+\"/\1\"${!PALETTE}\"/" "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  sed -i -E "s/(selected_item_color = )\"#[0-9a-fA-F]+\"/\1\"${COLORS[${PALETTE}]}\"/" "${THEME_DIR}/${THEME_NAME}/theme.txt"
 fi
 
 # Set theme
