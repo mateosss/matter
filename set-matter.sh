@@ -4,6 +4,7 @@ ROOT_UID=0
 THEME_DIR="/boot/grub/themes"
 THEME_DIR_2="/boot/grub2/themes"
 THEME_NAME=Matter
+SCRIPT_DIR=`dirname "$(readlink -f "$0")"`
 
 echo "Installing Matter grub theme..."
 
@@ -45,8 +46,8 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
 
   # Copy theme
   echo "Installing ${THEME_NAME} theme..."
-  [[ -d /boot/grub ]] && cp -a ${THEME_NAME} ${THEME_DIR}
-  [[ -d /boot/grub2 ]] && cp -a ${THEME_NAME} ${THEME_DIR_2}
+  [[ -d /boot/grub ]] && cp -a ${SCRIPT_DIR}/${THEME_NAME} ${THEME_DIR}
+  [[ -d /boot/grub2 ]] && cp -a ${SCRIPT_DIR}/${THEME_NAME} ${THEME_DIR_2}
 
   # Setting palette color
   if [ "${PALETTE}" == "blue" ]; then
