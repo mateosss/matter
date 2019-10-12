@@ -75,7 +75,7 @@ if [ "$UID" -eq "$ROOT_UID" ]; then
   
   # Set theme
   echo -e "Setting ${THEME_NAME} as default..."
-  grep "GRUB_THEME=" /etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /etc/default/grub
+  sed -i '/GRUB_THEME=/d' /etc/default/grub
 
   [[ -d /boot/grub ]] && echo "GRUB_THEME=\"${THEME_DIR}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
   [[ -d /boot/grub2 ]] && echo "GRUB_THEME=\"${THEME_DIR_2}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
