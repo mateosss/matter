@@ -13,11 +13,10 @@ and/or submit pull requests.
 
 Download the repo as a zip and run `sudo ./set-matter.sh`.
 
-## Font color
+## Highlight color
 
-`sudo ./set-matter.sh -p <color>` is something like `blue`, `red`, `deep-purple`
-and so on (read through `set-matter.sh` for other available colors).
-
+`sudo ./set-matter.sh -p <color>` (`./set-matter.sh -h` for list of available
+colors)
 
 # Removal
 

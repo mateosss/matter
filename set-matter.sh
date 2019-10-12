@@ -1,9 +1,9 @@
 #!/bin/bash
 
-THEME_DIR="/boot/grub/themes"
-THEME_DIR_2="/boot/grub2/themes"
+TARGET_DIR="/boot/grub/themes"
+TARGET_DIR_2="/boot/grub2/themes"
 THEME_NAME="Matter"
-SCRIPT_DIR=`dirname "$(readlink -f "$0")"`
+WORKING_DIR=`dirname "$(readlink -f "$0")"`
 
 declare -A COLORS
 readonly COLORS=(
@@ -26,8 +26,6 @@ if [ "$EUID" -ne 0 ]; then
   echo "Please run as root"
   exit 1
 fi
-
-echo "Installing Matter grub theme..."
 
 # Parsing parameters
 while [[ $# -gt 0 ]]; do
@@ -55,35 +53,37 @@ while [[ $# -gt 0 ]]; do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-# Check command avalibility
-function has_command() {
-  command -v $1 >/dev/null
-}
+echo "Configuring Matter..."
 
 # Create themes directory if not exists
 echo "Checking for the existence of themes directory..."
-[[ -d ${THEME_DIR}/${THEME_NAME} ]] && rm -rf ${THEME_DIR}/${THEME_NAME}
-[[ -d ${THEME_DIR_2}/${THEME_NAME} ]] && rm -rf ${THEME_DIR_2}/${THEME_NAME}
-[[ -d /boot/grub ]] && mkdir -p ${THEME_DIR}
-[[ -d /boot/grub2 ]] && mkdir -p ${THEME_DIR_2}
-
-# Copy theme
-echo "Installing ${THEME_NAME} theme..."
-[[ -d /boot/grub ]] && cp -a ${SCRIPT_DIR}/${THEME_NAME} ${THEME_DIR}
-[[ -d /boot/grub2 ]] && cp -a ${SCRIPT_DIR}/${THEME_NAME} ${THEME_DIR_2}
+[[ -d ${TARGET_DIR}/${THEME_NAME} ]] && rm -rf ${TARGET_DIR}/${THEME_NAME}
+[[ -d ${TARGET_DIR_2}/${THEME_NAME} ]] && rm -rf ${TARGET_DIR_2}/${THEME_NAME}
+[[ -d /boot/grub ]] && mkdir -p ${TARGET_DIR}
+[[ -d /boot/grub2 ]] && mkdir -p ${TARGET_DIR_2}
 
 # Set the chosen color if it is supported
 if [[ "${!COLORS[*]}" =~ "${PALETTE}" ]]; then
   echo -e "Setting theme to ${PALETTE}"
-  sed -i -E "s/(selected_item_color = )\"#[0-9a-fA-F]+\"/\1\"${COLORS[${PALETTE}]}\"/" "${THEME_DIR}/${THEME_NAME}/theme.txt"
+  sed -i -E "s/(selected_item_color = )\"#[0-9a-fA-F]+\"/\1\"${COLORS[${PALETTE}]}\"/" "${WORKING_DIR}/${THEME_NAME}/theme.txt"
 fi
+
+# Copy theme
+echo "Installing ${THEME_NAME} theme..."
+[[ -d /boot/grub ]] && cp -a ${WORKING_DIR}/${THEME_NAME} ${TARGET_DIR}
+[[ -d /boot/grub2 ]] && cp -a ${WORKING_DIR}/${THEME_NAME} ${TARGET_DIR_2}
 
 # Set theme
 echo -e "Setting ${THEME_NAME} as default..."
-grep "GRUB_THEME=" /etc/default/grub 2>&1 >/dev/null && sed -i '/GRUB_THEME=/d' /etc/default/grub
+sed -i '/GRUB_THEME=/d' /etc/default/grub
 
-[[ -d /boot/grub ]] && echo "GRUB_THEME=\"${THEME_DIR}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
-[[ -d /boot/grub2 ]] && echo "GRUB_THEME=\"${THEME_DIR_2}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
+[[ -d /boot/grub ]] && echo "GRUB_THEME=\"${TARGET_DIR}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
+[[ -d /boot/grub2 ]] && echo "GRUB_THEME=\"${TARGET_DIR_2}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
+
+# Check command avalibility
+function has_command() {
+  command -v $1 >/dev/null
+}
 
 # Update grub config
 echo -e "Updating grub config..."
