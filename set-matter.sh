@@ -21,6 +21,9 @@ readonly COLORS=(
   [WHITE]="#FFFFFF"
 )
 
+# Default highlight color
+PALETTE="PINK"
+
 # Parsing parameters
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -31,12 +34,17 @@ while [[ $# -gt 0 ]]; do
     shift # past argument
     shift # past value
     ;;
+  -u | --uninstall)
+    UNISTALL=1
+    shift
+    ;;
   -h | --help)
     echo "Usage (run as root): $0 [options]"
     echo
     echo "Options:"
     echo -e "  -p, --palette COLOR\tChanges color palette (Supported colors: ${!COLORS[*]})"
     echo -e "  -h, --help\t\tDisplay this help and exit"
+    echo -e "  -u, --uninstall\t\tUninstall Matter"
     exit 0
     ;;
   *) # unknown option
@@ -45,6 +53,7 @@ while [[ $# -gt 0 ]]; do
     ;;
   esac
 done
+echo $POSITIONAL
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
 # Checking for root access
@@ -53,6 +62,37 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+function has_command() {
+  # Check command avalibility
+  command -v $1 >/dev/null
+}
+
+function update_grub() {
+  # Update grub config
+  echo -e "Updating grub config..."
+  if has_command update-grub; then
+    update-grub
+  elif has_command grub-mkconfig; then
+    grub-mkconfig -o /boot/grub/grub.cfg
+  elif has_command grub2-mkconfig; then
+    grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
+  fi
+}
+
+# Uninstall
+if [[ "${UNISTALL}" == "1" ]]; then
+  echo "Removing Matter..."
+  [[ -d ${TARGET_DIR}/${THEME_NAME} ]] && rm -rf ${TARGET_DIR}/${THEME_NAME}
+  [[ -d ${TARGET_DIR_2}/${THEME_NAME} ]] && rm -rf ${TARGET_DIR_2}/${THEME_NAME}
+
+  sed -i '/GRUB_THEME=/d' /etc/default/grub
+
+  update_grub
+  echo "Done."
+  exit 0
+fi
+
+# Install
 echo "Configuring Matter..."
 
 # Create themes directory if not exists
@@ -65,7 +105,7 @@ echo "Checking for the existence of themes directory..."
 # Set the chosen color if it is supported
 if [[ "${!COLORS[*]}" =~ "${PALETTE}" ]]; then
   echo -e "Setting theme to ${PALETTE}"
-  sed -i -E "s/(selected_item_color = )\"#[0-9a-fA-F]+\"/\1\"${COLORS[${PALETTE}]}\"/" "${WORKING_DIR}/${THEME_NAME}/theme.txt"
+  sed -i -E "s/(selected_item_color = )\".*\"/\1\"${COLORS[${PALETTE}]}\"/" "${WORKING_DIR}/${THEME_NAME}/theme.txt"
 fi
 
 # Copy theme
@@ -80,19 +120,5 @@ sed -i '/GRUB_THEME=/d' /etc/default/grub
 [[ -d /boot/grub ]] && echo "GRUB_THEME=\"${TARGET_DIR}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
 [[ -d /boot/grub2 ]] && echo "GRUB_THEME=\"${TARGET_DIR_2}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
 
-# Check command avalibility
-function has_command() {
-  command -v $1 >/dev/null
-}
-
-# Update grub config
-echo -e "Updating grub config..."
-if has_command update-grub; then
-  update-grub
-elif has_command grub-mkconfig; then
-  grub-mkconfig -o /boot/grub/grub.cfg
-elif has_command grub2-mkconfig; then
-  grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
-fi
-
+update_grub
 echo "Done."
