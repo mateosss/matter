@@ -21,12 +21,6 @@ readonly COLORS=(
   [WHITE]="#FFFFFF"
 )
 
-# Checking for root access
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root"
-  exit 1
-fi
-
 # Parsing parameters
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -38,11 +32,11 @@ while [[ $# -gt 0 ]]; do
     shift # past value
     ;;
   -h | --help)
-    echo "Usage: $0 [--laptop]"
+    echo "Usage (run as root): $0 [options]"
     echo
     echo "Options:"
-    echo "  -p --palette      Changes color palette (Supported colors: ${!COLORS[*]})"
-    echo "  -h --help         Display this help and exit"
+    echo -e "  -p, --palette COLOR\tChanges color palette (Supported colors: ${!COLORS[*]})"
+    echo -e "  -h, --help\t\tDisplay this help and exit"
     exit 0
     ;;
   *) # unknown option
@@ -52,6 +46,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
+
+# Checking for root access
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root"
+  exit 1
+fi
 
 echo "Configuring Matter..."
 
