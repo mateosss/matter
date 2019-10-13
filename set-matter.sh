@@ -37,12 +37,16 @@ while [[ $# -gt 0 ]]; do
     shift # past argument
     shift # past value
     ;;
+  -u | --uninstall)
+    UNISTALL=1
+    ;;
   -h | --help)
     echo "Usage: $0 [--laptop]"
     echo
     echo "Options:"
     echo "  -p --palette      Changes color palette (Supported colors: ${!COLORS[*]})"
     echo "  -h --help         Display this help and exit"
+    echo "  -u --uninstall    Uninstall Matter theme"
     exit 0
     ;;
   *) # unknown option
@@ -52,6 +56,35 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
+
+# Check command avalibility
+function has_command() {
+  command -v $1 >/dev/null
+}
+
+function update_grub() {
+  # Update grub config
+  echo -e "Updating grub config..."
+  if has_command update-grub; then
+    update-grub
+  elif has_command grub-mkconfig; then
+    grub-mkconfig -o /boot/grub/grub.cfg
+  elif has_command grub2-mkconfig; then
+    grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
+  fi
+}
+
+if [[ "${UNISTALL}" == "1" ]]; then
+  echo "Removing Matter..."
+  [[ -d ${TARGET_DIR}/${THEME_NAME} ]] && rm -rf ${TARGET_DIR}/${THEME_NAME}
+  [[ -d ${TARGET_DIR_2}/${THEME_NAME} ]] && rm -rf ${TARGET_DIR_2}/${THEME_NAME}
+
+  sed -i '/GRUB_THEME=/d' /etc/default/grub
+
+  update_grub
+  echo "Done."
+  exit 0
+fi
 
 echo "Configuring Matter..."
 
@@ -80,19 +113,5 @@ sed -i '/GRUB_THEME=/d' /etc/default/grub
 [[ -d /boot/grub ]] && echo "GRUB_THEME=\"${TARGET_DIR}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
 [[ -d /boot/grub2 ]] && echo "GRUB_THEME=\"${TARGET_DIR_2}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
 
-# Check command avalibility
-function has_command() {
-  command -v $1 >/dev/null
-}
-
-# Update grub config
-echo -e "Updating grub config..."
-if has_command update-grub; then
-  update-grub
-elif has_command grub-mkconfig; then
-  grub-mkconfig -o /boot/grub/grub.cfg
-elif has_command grub2-mkconfig; then
-  grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
-fi
-
+update_grub
 echo "Done."
