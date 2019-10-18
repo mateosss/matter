@@ -21,7 +21,7 @@ terminal-border: "0"
   height = 60%
   item_font = "GoogleSans Regular 32"
   item_color = "#cccccc"
-  selected_item_color = "#e91e63"
+  selected_item_color = "#009688"
   icon_width = 72
   icon_height = 72
   item_height = 72
