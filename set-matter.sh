@@ -4,7 +4,7 @@ TARGET_DIR="/boot/grub/themes"
 TARGET_DIR_2="/boot/grub2/themes"
 THEME_NAME="Matter"
 WORKING_DIR=`dirname "$(readlink -f "$0")"`
-RESOLUTION="1024x768"
+RESOLUTION="1920x1080"
 
 declare -A COLORS
 readonly COLORS=(
@@ -96,8 +96,7 @@ if [[ "${UNISTALL}" == "1" ]]; then
   # If the script was run with the -n option it doesn't add any new resolutions
   if [[ $(grep "GRUB_GFXMODE" /etc/default/grub | wc -l) -gt 1 ]]; then
     # In order to only remove the line we added we use line numbers instead of pattern matching
-    lineNum=$(grep -n "GRUB_GFXMODE" /etc/default/grub | tail -1 | cut -d : -f 1)
-    sed -i "${lineNum}d" /etc/default/grub # Deletes the new line added by the script
+    sed -i "$(grep -n "GRUB_GFXMODE" /etc/default/grub | tail -1 | cut -d : -f 1)d" /etc/default/grub # Deletes the new line added by the script
     sed -i 's/.*GRUB_GFXMODE/GRUB_GFXMODE/' /etc/default/grub # Uncomments the old line which was already present
   fi
 
@@ -115,7 +114,7 @@ if [[ "${NOCHECK}" != "1" ]]; then
   if has_command hwinfo; then
     if [[ $(hwinfo --framebuffer | grep "${RESOLUTION}") ]]; then
       echo "Setting grub resolution to ${RESOLUTION}"
-      sed -i 's/GRUB_GFXMODE/#GRUB_GFXMODE/g' /etc/default/grub
+      sed -i 's/GRUB_GFXMODE/#GRUB_GFXMODE/g' /etc/default/grub # Comments out the old resolution in case the user want to save something specified
       echo "GRUB_GFXMODE=${RESOLUTION}x$(hwinfo --framebuffer | grep "${RESOLUTION}" | tail -1 | cut -d ' ' -f 7),auto" >> /etc/default/grub
     else
       echo "${RESOLUTION} is not available on your system, run the script with the -n option to set the theme anyways"
