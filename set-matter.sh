@@ -121,4 +121,15 @@ sed -i '/GRUB_THEME=/d' /etc/default/grub
 [[ -d /boot/grub2 ]] && echo "GRUB_THEME=\"${TARGET_DIR_2}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
 
 update_grub
+
+# Add default icons
+echo "Adding default icons..."
+if has_command grub-mkconfig; then
+  sed -i -E -e "s/.*(menuentry) '[^']+'(( --class [^ ]+)+)?/& --class play/" /boot/grub/grub.cfg
+  sed -i -E -e "s/.*(submenu) '[^']+'(( --class [^ ]+)+)?/& --class folder/" /boot/grub/grub.cfg
+elif has_command grub2-mkconfig; then
+  sed -i -E -e "s/.*(menuentry) '[^']+'(( --class [^ ]+)+)?/& --class play/" /boot/efi/EFI/fedora/grub.cfg
+  sed -i -E -e "s/.*(submenu) '[^']+'(( --class [^ ]+)+)?/& --class folder/" /boot/efi/EFI/fedora/grub.cfg
+fi
+
 echo "Done."
