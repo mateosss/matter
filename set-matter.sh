@@ -111,17 +111,17 @@ echo "Configuring Matter..."
 # Checks for 1920x1080 resolution and changes to it if it is available
 if [[ "${NOCHECK}" != "1" ]]; then
   echo "Checking for resolution"
-  if has_command hwinfo; then
-    if [[ $(hwinfo --framebuffer | grep "${RESOLUTION}") ]]; then
+  if has_command xrandr; then
+    if [[ $(xrandr | grep "${RESOLUTION}") ]]; then
       echo "Setting grub resolution to ${RESOLUTION}"
       sed -i 's/GRUB_GFXMODE/#GRUB_GFXMODE/g' /etc/default/grub # Comments out the old resolution in case the user want to save something specified
-      echo "GRUB_GFXMODE=${RESOLUTION}x$(hwinfo --framebuffer | grep "${RESOLUTION}" | tail -1 | cut -d ' ' -f 7),auto" >> /etc/default/grub
+      echo "GRUB_GFXMODE=${RESOLUTION},auto" >> /etc/default/grub
     else
       echo "${RESOLUTION} is not available on your system, run the script with the -n option to set the theme anyways"
       exit 0
     fi
   else
-    echo "Could not check for the correct resolution, please install hwinfo or run the script with the -n option"
+    echo "Could not check for the correct resolution, please install xrandr or if you use wayland, run the script with the -n option"
     exit 0
   fi
 fi
