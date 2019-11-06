@@ -86,6 +86,7 @@ if [[ "${UNISTALL}" == "1" ]]; then
   [[ -d ${TARGET_DIR_2}/${THEME_NAME} ]] && rm -rf ${TARGET_DIR_2}/${THEME_NAME}
 
   sed -i '/GRUB_THEME=/d' /etc/default/grub
+  sed -i '/# Added by Matter theme/d' /etc/default/grub 
 
   update_grub
   echo "Done."
@@ -117,8 +118,10 @@ echo "Installing ${THEME_NAME} theme..."
 echo -e "Setting ${THEME_NAME} as default..."
 sed -i '/GRUB_THEME=/d' /etc/default/grub
 
-[[ -d /boot/grub ]] && echo "GRUB_THEME=\"${TARGET_DIR}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
-[[ -d /boot/grub2 ]] && echo "GRUB_THEME=\"${TARGET_DIR_2}/${THEME_NAME}/theme.txt\"" >>/etc/default/grub
+[[ -d /boot/grub ]] && echo "# Added by Matter theme" >> /etc/default/grub
+[[ -d /boot/grub2 ]] && echo "# Added by Matter theme" >> /etc/default/grub
+[[ -d /boot/grub ]] && echo "GRUB_THEME=\"${TARGET_DIR}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
+[[ -d /boot/grub2 ]] && echo "GRUB_THEME=\"${TARGET_DIR_2}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
 
 update_grub
 
