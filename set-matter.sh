@@ -123,6 +123,11 @@ sed -i '/GRUB_THEME=/d' /etc/default/grub
 [[ -d /boot/grub ]] && echo "GRUB_THEME=\"${TARGET_DIR}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
 [[ -d /boot/grub2 ]] && echo "GRUB_THEME=\"${TARGET_DIR_2}/${THEME_NAME}/theme.txt\"" >> /etc/default/grub
 
+# Set grub resolution
+sed -i '/GRUB_GFXMODE=/d' /etc/default/grub
+[[ -d /boot/grub ]] && echo "GRUB_GFXMODE=1920x1080,auto" >> /etc/default/grub
+[[ -d /boot/grub2 ]] && echo "GRUB_GFXMODE=auto" >> /etc/default/grub
+
 update_grub
 
 # Add default icons
