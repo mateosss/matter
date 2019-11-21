@@ -4,6 +4,7 @@ TARGET_DIR="/boot/grub/themes"
 TARGET_DIR_2="/boot/grub2/themes"
 THEME_NAME="Matter"
 WORKING_DIR=`dirname "$(readlink -f "$0")"`
+RESOLUTION="1920x1080"
 
 declare -A COLORS
 readonly COLORS=(
@@ -38,6 +39,10 @@ while [[ $# -gt 0 ]]; do
     UNISTALL=1
     shift
     ;;
+  -n | --nocheck)
+    NOCHECK=1
+    shift
+    ;;
   -h | --help)
     echo "Usage (run as root): $0 [options]"
     echo
@@ -45,6 +50,7 @@ while [[ $# -gt 0 ]]; do
     echo -e "  -p, --palette COLOR\tChanges color palette (Supported colors: ${!COLORS[*]})"
     echo -e "  -h, --help\t\tDisplay this help and exit"
     echo -e "  -u, --uninstall\t\tUninstall Matter"
+    echo -e "  -n, --nocheck\t\tDisables checking for and changing to the correct resolution, using this option may result in a bad looking menu"
     exit 0
     ;;
   *) # unknown option
@@ -86,6 +92,13 @@ if [[ "${UNISTALL}" == "1" ]]; then
   [[ -d ${TARGET_DIR_2}/${THEME_NAME} ]] && rm -rf ${TARGET_DIR_2}/${THEME_NAME}
 
   sed -i '/GRUB_THEME=/d' /etc/default/grub
+  
+  # If the script was run with the -n option it doesn't add any new resolutions
+  if [[ $(grep "GRUB_GFXMODE" /etc/default/grub | wc -l) -gt 1 ]]; then
+    # In order to only remove the line we added we use line numbers instead of pattern matching
+    sed -i "$(grep -n "GRUB_GFXMODE" /etc/default/grub | tail -1 | cut -d : -f 1)d" /etc/default/grub # Deletes the new line added by the script
+    sed -i 's/.*GRUB_GFXMODE/GRUB_GFXMODE/' /etc/default/grub # Uncomments the old line which was already present
+  fi
 
   update_grub
   echo "Done."
@@ -94,6 +107,24 @@ fi
 
 # Install
 echo "Configuring Matter..."
+
+# Checks for 1920x1080 resolution and changes to it if it is available
+if [[ "${NOCHECK}" != "1" ]]; then
+  echo "Checking for resolution"
+  if has_command xrandr; then
+    if [[ $(xrandr | grep "${RESOLUTION}") ]]; then
+      echo "Setting grub resolution to ${RESOLUTION}"
+      sed -i 's/GRUB_GFXMODE/#GRUB_GFXMODE/g' /etc/default/grub # Comments out the old resolution in case the user want to save something specified
+      echo "GRUB_GFXMODE=${RESOLUTION},auto" >> /etc/default/grub
+    else
+      echo "${RESOLUTION} is not available on your system, run the script with the -n option to set the theme anyways"
+      exit 0
+    fi
+  else
+    echo "Could not check for the correct resolution, please install xrandr or if you use wayland, run the script with the -n option"
+    exit 0
+  fi
+fi
 
 # Create themes directory if not exists
 echo "Checking for the existence of themes directory..."
