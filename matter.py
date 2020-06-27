@@ -3,7 +3,8 @@
 import sys
 import os
 import re
-from argparse import ArgumentParser
+import argparse
+from argparse import ArgumentParser, RawTextHelpFormatter
 from os.path import dirname, isdir
 from subprocess import run, check_call
 from shutil import which, rmtree, copytree
@@ -13,6 +14,14 @@ from shutil import which, rmtree, copytree
 MIN_PYTHON_VERSION = (3, 6)  # Mainly for f-strings
 
 THEME_NAME = "Matter"
+THEME_DESCRIPTION = (
+    "Matter is a minimalist grub theme originally inspired by material design 2.\n"
+    "Running this script without arguments will install the theme."
+)
+THEME_DEFAULT_HIGHLIGHT = "pink"
+THEME_DEFAULT_FOREGROUND = "white-350"
+THEME_DEFAULT_BACKGROUND = "bluegrey-900"
+
 INSTALLER_NAME = __file__
 INSTALLER_DIR = dirname(os.path.realpath(INSTALLER_NAME))
 INSTALLATION_SOURCE_DIR = f"{INSTALLER_DIR}/{THEME_NAME}"
@@ -26,6 +35,36 @@ GRUB_DEFAULTS_TEMPLATE_PATH = f"{INSTALLER_DIR}/grub.template"
 THEME_OVERRIDES_TITLE = f"{THEME_NAME} Theme Overrides"
 BEGIN_THEME_OVERRIDES = f"### BEGIN {THEME_OVERRIDES_TITLE}"
 END_THEME_OVERRIDES = f"### END {THEME_OVERRIDES_TITLE}"
+
+PALETTE = {
+    "red": "#f44336",
+    "pink": "#e91e63",
+    "purple": "#9c27b0",
+    "deeppurple": "#673ab7",
+    "indigo": "#3f51b5",
+    "blue": "#2196f3",
+    "lightblue": "#03a9f4",
+    "cyan": "#00bcd4",
+    "teal": "#009688",
+    "green": "#4caf50",
+    "lightgreen": "#8bc34a",
+    "lime": "#cddc39",
+    "yellow": "#ffeb3b",
+    "amber": "#ffc107",
+    "orange": "#ff9800",
+    "deeporange": "#ff5722",
+    "brown": "#795548",
+    "grey": "#9e9e9e",
+    "bluegrey": "#607d8b",
+    "white": "#ffffff",
+    "black": "#000000",
+    # Custom default colors
+    "white-350": "#9E9E9E",
+    "bluegrey-900": "#263238",
+}
+
+# Global user arguments set in main()
+user_args: argparse.Namespace
 
 # Utils
 
@@ -82,10 +121,44 @@ def read_cleaned_grub_defaults():
     return cleaned_grub_defaults
 
 
+def parse_color(color_string):
+    color = color_string if color_string.startswith("#") else PALETTE[color_string]
+    assert (
+        re.match(r"\#[0-9A-Fa-f]{6}", color) is not None
+    ), f"Invalid color parsed from {color_string}"
+    return color
+
+
 def parse_args():
-    parser = ArgumentParser()
+    parser = ArgumentParser(
+        description=THEME_DESCRIPTION,
+        epilog=f"Available colors are {', '.join(PALETTE.keys())}.\n"
+        "You can specify your own hex colors as well (e.g. \\#C0FFEE, \\#FF00FF, etc).",
+        formatter_class=RawTextHelpFormatter,
+    )
     parser.add_argument(
         "--uninstall", "-u", action="store_true", help=f"uninstall {THEME_NAME}",
+    )
+    parser.add_argument(
+        "--highlight",
+        "-hl",
+        type=str,
+        help=f"selected text color",
+        default=THEME_DEFAULT_HIGHLIGHT,
+    )
+    parser.add_argument(
+        "--foreground",
+        "-fg",
+        type=str,
+        help=f"main text color",
+        default=THEME_DEFAULT_FOREGROUND,
+    )
+    parser.add_argument(
+        "--background",
+        "-bg",
+        type=str,
+        help=f"solid background color",
+        default=THEME_DEFAULT_BACKGROUND,
     )
     return parser.parse_args()
 
@@ -102,10 +175,10 @@ def clean_install_dir():
 def prepare_source_dir():
     print("[Info] Build theme from user preferences.")
 
-    # Temporary settings until user args are implemented
-    highlight = "#E91E63"  # pink
-    foreground = "#CCCCCC"  # white
-    background = "#263238"  # dark-gray
+    # Get user color preferences
+    highlight = parse_color(user_args.highlight)
+    foreground = parse_color(user_args.foreground)
+    background = parse_color(user_args.background)
 
     # Parse theme template with user preferences
     with open(THEME_TEMPLATE_PATH, "r", newline="") as f:
@@ -189,8 +262,8 @@ def do_uninstall():
 
 if __name__ == "__main__":
     check_python_version()
-    args = parse_args()
-    if args.uninstall:
+    user_args = parse_args()
+    if user_args.uninstall:
         do_uninstall()
     else:
         do_install()
