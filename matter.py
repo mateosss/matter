@@ -5,7 +5,7 @@ import os
 import re
 import argparse
 from argparse import ArgumentParser, RawTextHelpFormatter
-from os.path import dirname, isdir
+from os.path import dirname, basename, isdir
 from subprocess import run, check_call
 from shutil import which, rmtree, copytree
 
@@ -22,13 +22,15 @@ THEME_DEFAULT_HIGHLIGHT = "pink"
 THEME_DEFAULT_FOREGROUND = "white-350"
 THEME_DEFAULT_BACKGROUND = "bluegrey-900"
 
-INSTALLER_NAME = __file__
+INSTALLER_NAME = basename(__file__)
+
 INSTALLER_DIR = dirname(os.path.realpath(INSTALLER_NAME))
 INSTALLATION_SOURCE_DIR = f"{INSTALLER_DIR}/{THEME_NAME}"
 INSTALLATION_TARGET_DIR = f"/boot/grub/themes/{THEME_NAME}"
 
 GRUB_DEFAULTS_PATH = f"/etc/default/grub"
 GRUB_CFG_PATH = f"/boot/grub/grub.cfg"
+GRUB_MKCONFIG_PATH = which("grub-mkconfig")
 
 THEME_TEMPLATE_PATH = f"{INSTALLER_DIR}/theme.txt.template"
 GRUB_DEFAULTS_TEMPLATE_PATH = f"{INSTALLER_DIR}/grub.template"
@@ -84,17 +86,17 @@ def check_python_version():
     required = MIN_PYTHON_VERSION
     if installed < required:
         raise Exception(
-            f"[Error] Python {required[0]}.{required[1]} or later required."
+            f"[Matter Error] Python {required[0]}.{required[1]} or later required."
         )
 
 
 def check_root_or_prompt():
     if os.geteuid() != 0:
-        print(f"[Info] Request root access.")
+        print(f"[Matter Info] Request root access.")
         exit_code = sh("sudo -v")
         if exit_code != 0:
             raise Exception(
-                "[Error] Could not verify root access, you could try with sudo."
+                "[Matter Error] Could not verify root access, you could try with sudo."
             )
         # Relaunch the program with sudo
         args = " ".join(sys.argv[1:])
@@ -122,6 +124,25 @@ def read_cleaned_grub_defaults():
     return cleaned_grub_defaults
 
 
+def read_cleaned_grub_mkconfig():
+    assert (
+        GRUB_MKCONFIG_PATH is not None
+    ), "grub-mkconfig command is not present in your system"
+
+    # Read previous defaults
+    with open(GRUB_MKCONFIG_PATH, "r", newline="") as f:
+        grub_mkconfig = f.read()
+
+    # Remove previous theme defaults
+    cleaned_grub_mkconfig = re.sub(
+        f"\n*{BEGIN_THEME_OVERRIDES}.*{END_THEME_OVERRIDES}\n*",
+        "",
+        grub_mkconfig,
+        flags=re.DOTALL,
+    )
+    return cleaned_grub_mkconfig
+
+
 def parse_color(color_string):
     color = color_string if color_string.startswith("#") else PALETTE[color_string]
     assert (
@@ -134,13 +155,13 @@ def parse_color(color_string):
 
 
 def clean_install_dir():
-    print("[Info] Clean install directory.")
+    print("[Matter Info] Clean install directory.")
     if isdir(INSTALLATION_TARGET_DIR):
         rmtree(INSTALLATION_TARGET_DIR)
 
 
 def prepare_source_dir():
-    print("[Info] Build theme from user preferences.")
+    print("[Matter Info] Build theme from user preferences.")
 
     # Get user color preferences
     highlight = parse_color(user_args.highlight)
@@ -165,24 +186,24 @@ def prepare_source_dir():
 
 
 def prepare_target_dir():
-    print("[Info] Prepare installation directory.")
+    print("[Matter Info] Prepare installation directory.")
     clean_install_dir()
 
 
 def copy_source_to_target():
-    print("[Info] Copy built theme to installation directory.")
+    print("[Matter Info] Copy built theme to installation directory.")
     copytree(INSTALLATION_SOURCE_DIR, INSTALLATION_TARGET_DIR)
 
 
 def update_grub_cfg():
     COMMAND = "update-grub"
-    print(f"[Info] Remake grub.cfg with {COMMAND}.")
+    print(f"[Matter Info] Remake grub.cfg with {COMMAND}.")
     assert has_command(COMMAND)
     sh(COMMAND)
 
 
 def update_grub_defaults():
-    print(f"[Info] Patch {GRUB_DEFAULTS_PATH} with {THEME_OVERRIDES_TITLE}.")
+    print(f"[Matter Info] Patch {GRUB_DEFAULTS_PATH} with {THEME_OVERRIDES_TITLE}.")
     grub_configs = read_cleaned_grub_defaults()
 
     # Parse grub defaults template, append parsed contents, and write back
@@ -201,33 +222,41 @@ def update_grub_defaults():
 
 
 def clean_grub_defaults():
-    print(f"[Info] Clean {THEME_OVERRIDES_TITLE}.")
+    print(f"[Matter Info] Clean {THEME_OVERRIDES_TITLE} from {GRUB_DEFAULTS_PATH}.")
     cleaned_grub_defaults = read_cleaned_grub_defaults()
     with open(GRUB_DEFAULTS_PATH, "w") as f:
         f.write(cleaned_grub_defaults)
+
+
+def clean_grub_mkconfig():
+    print(f"[Matter Info] Clean {THEME_OVERRIDES_TITLE} from {GRUB_MKCONFIG_PATH}.")
+    cleaned_grub_mkconfig = read_cleaned_grub_mkconfig()
+    with open(GRUB_MKCONFIG_PATH, "w") as f:
+        f.write(cleaned_grub_mkconfig)
 
 
 # Main procedures
 
 
 def do_install():
-    print(f"[Info] Begin {THEME_NAME} install.")
+    print(f"[Matter Info] Begin {THEME_NAME} install.")
     check_root_or_prompt()
     prepare_source_dir()
     prepare_target_dir()
     copy_source_to_target()
     update_grub_defaults()
     update_grub_cfg()
-    print(f"{THEME_NAME} succesfully installed.")
+    print(f"[Matter Info] {THEME_NAME} succesfully installed.")
 
 
 def do_uninstall():
-    print(f"[Info] Begin {THEME_NAME} uninstall.")
+    print(f"[Matter Info] Begin {THEME_NAME} uninstall.")
     check_root_or_prompt()
     clean_grub_defaults()
+    clean_grub_mkconfig()
     clean_install_dir()
     update_grub_cfg()
-    print(f"{THEME_NAME} succesfully uninstalled.")
+    print(f"[Matter Info] {THEME_NAME} succesfully uninstalled.")
 
 
 def do_list_grub_cfg_entries():
@@ -244,10 +273,10 @@ def do_list_grub_cfg_entries():
         print(f"{i + 1}. {m['entryname']}")
 
 
-def do_patch_grub_cfg_icons():
-    print(f"[Info] Begin {GRUB_CFG_PATH} patch")
-    assert user_args.seticons is not None
-    icons = user_args.seticons
+def do_patch_grub_cfg_icons(icons=None):
+    print(f"[Matter Info] Begin {GRUB_CFG_PATH} patch.")
+    icons = icons if icons is not None else user_args.seticons_once
+    assert icons is not None
 
     # Read current grub cfg
     with open(GRUB_CFG_PATH, "r", newline="") as f:
@@ -260,7 +289,7 @@ def do_patch_grub_cfg_icons():
 
     if len(icons) != len(matches):
         print(
-            f"[Error] You must specify {len(matches)} icons ({len(icons)} provided) for entries:"
+            f"[Matter Error] You must specify {len(matches)} icons ({len(icons)} provided) for entries:"
         )
         for i, m in enumerate(matches):
             print(f"{i + 1}. {m['entryname']}")
@@ -281,7 +310,31 @@ def do_patch_grub_cfg_icons():
     with open(GRUB_CFG_PATH, "w") as f:
         f.write(new_grub_cfg)
 
-    print(f"{len(icons)} icons succesfully patched onto {GRUB_CFG_PATH}")
+    print(f"[Matter Info] {len(icons)} icons succesfully patched onto {GRUB_CFG_PATH}.")
+
+
+def do_set_icons():
+    # Patch grub.cfg
+    icons = user_args.seticons or []
+    do_patch_grub_cfg_icons(icons)
+
+    # Patch grub-mkconfig so everytime it executes, it patches grub.cfg
+    print(f"[Matter Info] Begin {GRUB_MKCONFIG_PATH} patch.")
+    print(f"[Matter Info] Clean old {GRUB_MKCONFIG_PATH} patch if any.")
+    cmd_icons = " ".join(icons)
+    seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} -so {cmd_icons} >&2"
+    new_grub_mkconfig = read_cleaned_grub_mkconfig()
+    new_grub_mkconfig += (
+        f"\n\n{BEGIN_THEME_OVERRIDES}\n{seticons_call}\n{END_THEME_OVERRIDES}\n\n"
+    )
+
+    check_root_or_prompt()
+    with open(GRUB_MKCONFIG_PATH, "w") as f:
+        f.write(new_grub_mkconfig)
+
+    print(
+        f"[Matter Info] {GRUB_MKCONFIG_PATH} succesfully patched, icons should now persist between grub updates."
+    )
 
 
 # Script arguments
@@ -298,7 +351,18 @@ def parse_args():
         "--listentries", "-l", action="store_true", help=f"list grub entries",
     )
     parser.add_argument(
-        "--seticons", "-si", type=str, nargs="*", help=f"set grub entries icons",
+        "--seticons",
+        "-si",
+        type=str,
+        nargs="*",
+        help=f"set grub entries icons and patch grub-mkconfig for persistence",
+    )
+    parser.add_argument(
+        "--seticons_once",
+        "-so",
+        type=str,
+        nargs="*",
+        help=f"set grub entries icons, will be reverted on next grub update",
     )
     parser.add_argument(
         "--uninstall", "-u", action="store_true", help=f"uninstall {THEME_NAME}",
@@ -334,6 +398,8 @@ if __name__ == "__main__":
     if user_args.listentries:
         do_list_grub_cfg_entries()
     elif user_args.seticons is not None:
+        do_set_icons()
+    elif user_args.seticons_once is not None:
         do_patch_grub_cfg_icons()
     elif user_args.uninstall:
         do_uninstall()
