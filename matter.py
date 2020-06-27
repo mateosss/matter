@@ -28,6 +28,7 @@ INSTALLATION_SOURCE_DIR = f"{INSTALLER_DIR}/{THEME_NAME}"
 INSTALLATION_TARGET_DIR = f"/boot/grub/themes/{THEME_NAME}"
 
 GRUB_DEFAULTS_PATH = f"/etc/default/grub"
+GRUB_CFG_PATH = f"/boot/grub/grub.cfg"
 
 THEME_TEMPLATE_PATH = f"{INSTALLER_DIR}/theme.txt.template"
 GRUB_DEFAULTS_TEMPLATE_PATH = f"{INSTALLER_DIR}/grub.template"
@@ -108,7 +109,7 @@ def delete_dir(directory):
 
 def read_cleaned_grub_defaults():
     # Read previous defaults
-    with open(GRUB_DEFAULTS_PATH, "r") as f:
+    with open(GRUB_DEFAULTS_PATH, "r", newline="") as f:
         grub_defaults = f.read()
 
     # Remove previous theme defaults
@@ -129,41 +130,7 @@ def parse_color(color_string):
     return color
 
 
-def parse_args():
-    parser = ArgumentParser(
-        description=THEME_DESCRIPTION,
-        epilog=f"Available colors are {', '.join(PALETTE.keys())}.\n"
-        "You can specify your own hex colors as well (e.g. \\#C0FFEE, \\#FF00FF, etc).",
-        formatter_class=RawTextHelpFormatter,
-    )
-    parser.add_argument(
-        "--uninstall", "-u", action="store_true", help=f"uninstall {THEME_NAME}",
-    )
-    parser.add_argument(
-        "--highlight",
-        "-hl",
-        type=str,
-        help=f"selected text color",
-        default=THEME_DEFAULT_HIGHLIGHT,
-    )
-    parser.add_argument(
-        "--foreground",
-        "-fg",
-        type=str,
-        help=f"main text color",
-        default=THEME_DEFAULT_FOREGROUND,
-    )
-    parser.add_argument(
-        "--background",
-        "-bg",
-        type=str,
-        help=f"solid background color",
-        default=THEME_DEFAULT_BACKGROUND,
-    )
-    return parser.parse_args()
-
-
-# Main procedures
+# Procedures
 
 
 def clean_install_dir():
@@ -220,7 +187,7 @@ def update_grub_defaults():
 
     # Parse grub defaults template, append parsed contents, and write back
 
-    with open(GRUB_DEFAULTS_TEMPLATE_PATH, "r") as f:
+    with open(GRUB_DEFAULTS_TEMPLATE_PATH, "r", newline="") as f:
         template = f.read()
 
     context = {"installation_dir": INSTALLATION_TARGET_DIR}
@@ -238,6 +205,9 @@ def clean_grub_defaults():
     cleaned_grub_defaults = read_cleaned_grub_defaults()
     with open(GRUB_DEFAULTS_PATH, "w") as f:
         f.write(cleaned_grub_defaults)
+
+
+# Main procedures
 
 
 def do_install():
@@ -260,10 +230,112 @@ def do_uninstall():
     print(f"{THEME_NAME} succesfully uninstalled.")
 
 
+def do_list_grub_cfg_entries():
+    # Read current grub cfg
+    with open(GRUB_CFG_PATH, "r", newline="") as f:
+        grub_cfg = f.read()
+
+    # Capture entry matches
+    pattern = r'(?P<head>(?:submenu|menuentry) ?)"(?P<entryname>.*)"(?P<tail>.*\{)'
+    matchiter = re.finditer(pattern, grub_cfg)
+    matches = list(matchiter)
+
+    for i, m in enumerate(matches):
+        print(f"{i + 1}. {m['entryname']}")
+
+
+def do_patch_grub_cfg_icons():
+    print(f"[Info] Begin {GRUB_CFG_PATH} patch")
+    assert user_args.seticons is not None
+    icons = user_args.seticons
+
+    # Read current grub cfg
+    with open(GRUB_CFG_PATH, "r", newline="") as f:
+        grub_cfg = f.read()
+
+    # Capture entry matches
+    pattern = r'(?P<head>(?:submenu|menuentry) ?)"(?P<entryname>.*)"(?P<tail>.*\{)'
+    matchiter = re.finditer(pattern, grub_cfg)
+    matches = list(matchiter)
+
+    if len(icons) != len(matches):
+        print(
+            f"[Error] You must specify {len(matches)} icons ({len(icons)} provided) for entries:"
+        )
+        for i, m in enumerate(matches):
+            print(f"{i + 1}. {m['entryname']}")
+        exit(1)
+
+    # Build new grub cfg with given icons
+    new_grub_cfg = ""
+    next_seek = 0
+    for m, i in zip(matches, icons):
+        mstart, mend = m.span()
+        new_grub_cfg += grub_cfg[next_seek:mstart]
+        new_grub_cfg += f'{m["head"]}"{m["entryname"]}" --class {i} {m["tail"]}'
+        next_seek = mend
+    new_grub_cfg += grub_cfg[mend:]
+
+    # Write new grub cfg back
+    check_root_or_prompt()
+    with open(GRUB_CFG_PATH, "w") as f:
+        f.write(new_grub_cfg)
+
+    print(f"{len(icons)} icons succesfully patched onto {GRUB_CFG_PATH}")
+
+
+# Script arguments
+
+
+def parse_args():
+    parser = ArgumentParser(
+        description=THEME_DESCRIPTION,
+        epilog=f"Available colors are {', '.join(PALETTE.keys())}.\n"
+        "You can specify your own hex colors as well (e.g. \\#C0FFEE, \\#FF00FF, etc).",
+        formatter_class=RawTextHelpFormatter,
+    )
+    parser.add_argument(
+        "--listentries", "-l", action="store_true", help=f"list grub entries",
+    )
+    parser.add_argument(
+        "--seticons", "-si", type=str, nargs="*", help=f"set grub entries icons",
+    )
+    parser.add_argument(
+        "--uninstall", "-u", action="store_true", help=f"uninstall {THEME_NAME}",
+    )
+    parser.add_argument(
+        "--highlight",
+        "-hl",
+        type=str,
+        help=f"selected text color",
+        default=THEME_DEFAULT_HIGHLIGHT,
+    )
+    parser.add_argument(
+        "--foreground",
+        "-fg",
+        type=str,
+        help=f"main text color",
+        default=THEME_DEFAULT_FOREGROUND,
+    )
+    parser.add_argument(
+        "--background",
+        "-bg",
+        type=str,
+        help=f"solid background color",
+        default=THEME_DEFAULT_BACKGROUND,
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
     check_python_version()
     user_args = parse_args()
-    if user_args.uninstall:
+
+    if user_args.listentries:
+        do_list_grub_cfg_entries()
+    elif user_args.seticons is not None:
+        do_patch_grub_cfg_icons()
+    elif user_args.uninstall:
         do_uninstall()
     else:
         do_install()
