@@ -152,6 +152,8 @@ def parse_color(color_string):
     ), f"Invalid color parsed from {color_string}"
     return color
 
+def is_valid_icon(icon):
+    return icon in AVAILABLE_ICONS + ["_"]
 
 # Procedures
 
@@ -279,6 +281,11 @@ def do_patch_grub_cfg_icons(icons=None):
     print(f"[Matter Info] Begin {GRUB_CFG_PATH} patch.")
     icons = icons if icons is not None else user_args.seticons_once
     assert icons is not None
+    for icon in icons:
+        if not is_valid_icon(icon):
+            print(f"[Matter Error] Invalid icon name: {icon}.")
+            print(f"[Matter Error] See --help for valid icon names.")
+            exit(1)
 
     # Read current grub cfg
     with open(GRUB_CFG_PATH, "r", newline="") as f:
