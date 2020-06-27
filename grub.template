@@ -1,1 +1,2 @@
 GRUB_THEME={installation_dir}/theme.txt
+GRUB_GFXMODE=1920x1080,auto
