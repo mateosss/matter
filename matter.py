@@ -39,6 +39,8 @@ THEME_OVERRIDES_TITLE = f"{THEME_NAME} Theme Overrides"
 BEGIN_THEME_OVERRIDES = f"### BEGIN {THEME_OVERRIDES_TITLE}"
 END_THEME_OVERRIDES = f"### END {THEME_OVERRIDES_TITLE}"
 
+# Get available icons from icons/*.png by removing .png extension
+AVAILABLE_ICONS = [i[:-4] for i in os.listdir(f"{INSTALLATION_SOURCE_DIR}/icons/")]
 PALETTE = {
     "red": "#f44336",
     "pink": "#e91e63",
@@ -301,7 +303,8 @@ def do_patch_grub_cfg_icons(icons=None):
     for m, i in zip(matches, icons):
         mstart, mend = m.span()
         new_grub_cfg += grub_cfg[next_seek:mstart]
-        new_grub_cfg += f'{m["head"]}"{m["entryname"]}" --class {i} {m["tail"]}'
+        icon_class = f" --class {i} " if i != "_" else ""
+        new_grub_cfg += f'{m["head"]}"{m["entryname"]}"{icon_class}{m["tail"]}'
         next_seek = mend
     new_grub_cfg += grub_cfg[mend:]
 
@@ -343,8 +346,13 @@ def do_set_icons():
 def parse_args():
     parser = ArgumentParser(
         description=THEME_DESCRIPTION,
-        epilog=f"Available colors are {', '.join(PALETTE.keys())}.\n"
-        "You can specify your own hex colors as well (e.g. \\#C0FFEE, \\#FF00FF, etc).",
+        epilog=f"Available colors are: {', '.join(PALETTE.keys())}.\n"
+        "You can specify your own hex colors as well (e.g. \\#C0FFEE, \\#FF00FF, etc).\n"
+        f"Available icons are: {', '.join(AVAILABLE_ICONS)}\n"
+        "\nFor adding more icons you can do it yourself following this guide:\n"
+        "https://github.com/mateosss/matter/wiki/How-to-Contribute-an-Icon\n"
+        "Or request it (or any other thing) by opening an issue on:\n"
+        "https://github.com/mateosss/matter/issues",
         formatter_class=RawTextHelpFormatter,
     )
     parser.add_argument(
