@@ -1,4 +1,10 @@
-# GRUB2 gfxmenu Linux Vimix theme
+# If this file is called theme.txt then the theme template has been
+# already parsed and the comments below could not make too much sense.
+
+# theme.txt.template represents a python string that gets format()-ed
+# Note: for scaping literal curly braces, double them like so: { or }
+
+# Matter Theme File
 # Designed for any resolution
 
 # Global Property

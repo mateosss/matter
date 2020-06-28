@@ -21,6 +21,7 @@ THEME_DESCRIPTION = (
 THEME_DEFAULT_HIGHLIGHT = "pink"
 THEME_DEFAULT_FOREGROUND = "white-350"
 THEME_DEFAULT_BACKGROUND = "bluegrey-900"
+THEME_DEFAULT_FONT = "googlesans"
 
 INSTALLER_NAME = basename(__file__)
 
@@ -39,8 +40,10 @@ THEME_OVERRIDES_TITLE = f"{THEME_NAME} Theme Overrides"
 BEGIN_THEME_OVERRIDES = f"### BEGIN {THEME_OVERRIDES_TITLE}"
 END_THEME_OVERRIDES = f"### END {THEME_OVERRIDES_TITLE}"
 
-# Get available icons from icons/*.png by removing .png extension
-AVAILABLE_ICONS = [i[:-4] for i in os.listdir(f"{INSTALLATION_SOURCE_DIR}/icons/")]
+FONTS = {  # TODO: Should not be hardcoded
+    "googlesans": "GoogleSans Regular 32",
+    "amaticsc": "AmaticSC Regular 64",
+}
 PALETTE = {
     "red": "#f44336",
     "pink": "#e91e63",
@@ -67,6 +70,10 @@ PALETTE = {
     "white-350": "#9E9E9E",
     "bluegrey-900": "#263238",
 }
+# Get available icons from icons/*.png by removing .png extension
+AVAILABLE_ICONS = [i[:-4] for i in os.listdir(f"{INSTALLATION_SOURCE_DIR}/icons/")]
+AVAILABLE_FONTS = list(FONTS.keys())
+AVAILABLE_COLORS = list(PALETTE.keys())
 
 # Global user arguments set in main()
 user_args: argparse.Namespace
@@ -146,14 +153,34 @@ def read_cleaned_grub_mkconfig():
 
 
 def parse_color(color_string):
-    color = color_string if color_string.startswith("#") else PALETTE[color_string]
-    assert (
-        re.match(r"\#[0-9A-Fa-f]{6}", color) is not None
-    ), f"Invalid color parsed from {color_string}"
+    if color_string in AVAILABLE_COLORS:
+        color = PALETTE[color_string]
+    elif re.match(r"\#[0-9A-Fa-f]{6}", color_string) is not None:
+        color = color_string
+    else:
+        print(f"[Matter Error] Invalid color parsed from {color_string}")
+        print(
+            f"[Matter Error] Color must be an escaped hex code like \\\\#C00FFE or one of: {AVAILABLE_COLORS}."
+        )
+        exit(1)
     return color
 
-def is_valid_icon(icon):
-    return icon in AVAILABLE_ICONS + ["_"]
+
+def check_icon(icon):
+    if icon not in AVAILABLE_ICONS + ["_"]:
+        print(f"[Matter Error] Invalid icon name: {icon}.")
+        print(f"[Matter Error] Icon name must be one of: {AVAILABLE_ICONS}.")
+        exit(1)
+    return icon
+
+
+def parse_font(font):
+    if font not in AVAILABLE_FONTS:
+        print(f"[Matter Error] Invalid font name: {font}.")
+        print(f"[Matter Error] Font name must be one of: {AVAILABLE_FONTS}.")
+        exit(1)
+    return FONTS[font]
+
 
 # Procedures
 
@@ -171,6 +198,7 @@ def prepare_source_dir():
     highlight = parse_color(user_args.highlight)
     foreground = parse_color(user_args.foreground)
     background = parse_color(user_args.background)
+    font = parse_font(user_args.font)
 
     # Parse theme template with user preferences
     with open(THEME_TEMPLATE_PATH, "r", newline="") as f:
@@ -181,6 +209,7 @@ def prepare_source_dir():
         "highlight": highlight,
         "foreground": foreground,
         "background": background,
+        "font": font,
     }
     parsed_theme = template.format(**context)
 
@@ -281,11 +310,7 @@ def do_patch_grub_cfg_icons(icons=None):
     print(f"[Matter Info] Begin {GRUB_CFG_PATH} patch.")
     icons = icons if icons is not None else user_args.seticons_once
     assert icons is not None
-    for icon in icons:
-        if not is_valid_icon(icon):
-            print(f"[Matter Error] Invalid icon name: {icon}.")
-            print(f"[Matter Error] See --help for valid icon names.")
-            exit(1)
+    icons = [check_icon(i) for i in icons]
 
     # Read current grub cfg
     with open(GRUB_CFG_PATH, "r", newline="") as f:
@@ -353,7 +378,7 @@ def do_set_icons():
 def parse_args():
     parser = ArgumentParser(
         description=THEME_DESCRIPTION,
-        epilog=f"Available colors are: {', '.join(PALETTE.keys())}.\n"
+        epilog=f"Available colors are: {', '.join(AVAILABLE_COLORS)}.\n"
         "You can specify your own hex colors as well (e.g. \\#C0FFEE, \\#FF00FF, etc).\n"
         f"Available icons are: {', '.join(AVAILABLE_ICONS)}\n"
         "\nFor adding more icons you can do it yourself following this guide:\n"
@@ -402,6 +427,9 @@ def parse_args():
         type=str,
         help=f"solid background color",
         default=THEME_DEFAULT_BACKGROUND,
+    )
+    parser.add_argument(
+        "--font", "-f", type=str, help=f"theme font", default=THEME_DEFAULT_FONT,
     )
     return parser.parse_args()
 

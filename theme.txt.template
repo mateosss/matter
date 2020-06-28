@@ -11,7 +11,7 @@
 title-text: ""
 # desktop-image: "background.png"
 desktop-color: "{background}"
-terminal-font: "GoogleSans Regular 32"
+terminal-font: "{font}"
 terminal-box: "terminal_box_*.png"
 terminal-left: "0"
 terminal-top: "0"
@@ -25,7 +25,7 @@ terminal-border: "0"
   top = 29%
   width = 28%
   height = 60%
-  item_font = "GoogleSans Regular 32"
+  item_font = "{font}"
   item_color = "{foreground}"
   selected_item_color = "{highlight}"
   icon_width = 72
@@ -44,5 +44,5 @@ terminal-border: "0"
   id = "__timeout__"
   text = "Booting in %d seconds"
   color = "{foreground}"
-  font = "GoogleSans Regular 32"
+  font = "{font}"
 }}
