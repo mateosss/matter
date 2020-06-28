@@ -22,6 +22,7 @@ THEME_DEFAULT_HIGHLIGHT = "pink"
 THEME_DEFAULT_FOREGROUND = "white-350"
 THEME_DEFAULT_BACKGROUND = "bluegrey-900"
 THEME_DEFAULT_FONT = "googlesans"
+THEME_DEFAULT_FONT_SIZE = 32
 
 INSTALLER_NAME = basename(__file__)
 
@@ -40,10 +41,6 @@ THEME_OVERRIDES_TITLE = f"{THEME_NAME} Theme Overrides"
 BEGIN_THEME_OVERRIDES = f"### BEGIN {THEME_OVERRIDES_TITLE}"
 END_THEME_OVERRIDES = f"### END {THEME_OVERRIDES_TITLE}"
 
-FONTS = {  # TODO: Should not be hardcoded
-    "googlesans": "GoogleSans Regular 32",
-    "amaticsc": "AmaticSC Regular 64",
-}
 PALETTE = {
     "red": "#f44336",
     "pink": "#e91e63",
@@ -70,9 +67,10 @@ PALETTE = {
     "white-350": "#9E9E9E",
     "bluegrey-900": "#263238",
 }
-# Get available icons from icons/*.png by removing .png extension
+# Get available icons from Matter/icons/*.png by removing .png extension
 AVAILABLE_ICONS = [i[:-4] for i in os.listdir(f"{INSTALLATION_SOURCE_DIR}/icons/")]
-AVAILABLE_FONTS = list(FONTS.keys())
+# Get available fonts from fonts/*.ttf by removing .ttf extension
+AVAILABLE_FONTS = [i[:-4] for i in os.listdir(f"{INSTALLER_DIR}/fonts/")]
 AVAILABLE_COLORS = list(PALETTE.keys())
 
 # Global user arguments set in main()
@@ -174,12 +172,12 @@ def check_icon(icon):
     return icon
 
 
-def parse_font(font):
+def check_font(font):
     if font not in AVAILABLE_FONTS:
         print(f"[Matter Error] Invalid font name: {font}.")
         print(f"[Matter Error] Font name must be one of: {AVAILABLE_FONTS}.")
         exit(1)
-    return FONTS[font]
+    return font
 
 
 # Procedures
@@ -198,7 +196,15 @@ def prepare_source_dir():
     highlight = parse_color(user_args.highlight)
     foreground = parse_color(user_args.foreground)
     background = parse_color(user_args.background)
-    font = parse_font(user_args.font)
+    font = check_font(user_args.font)
+    fontsize = user_args.fontsize
+
+    # Generate font file
+    grub_mkfont = "grub-mkfont"
+    assert has_command(grub_mkfont), f"{grub_mkfont} command not found in your system"
+    sh(
+        f"{grub_mkfont} -o {INSTALLATION_SOURCE_DIR}/font.pf2 {INSTALLER_DIR}/fonts/{font}.ttf -s {fontsize}"
+    )
 
     # Parse theme template with user preferences
     with open(THEME_TEMPLATE_PATH, "r", newline="") as f:
@@ -209,7 +215,6 @@ def prepare_source_dir():
         "highlight": highlight,
         "foreground": foreground,
         "background": background,
-        "font": font,
     }
     parsed_theme = template.format(**context)
 
@@ -231,7 +236,7 @@ def copy_source_to_target():
 def update_grub_cfg():
     COMMAND = "update-grub"
     print(f"[Matter Info] Remake grub.cfg with {COMMAND}.")
-    assert has_command(COMMAND)
+    assert has_command(COMMAND), f"{COMMAND} command not found in your system"
     sh(COMMAND)
 
 
@@ -267,18 +272,20 @@ def clean_grub_mkconfig():
     with open(GRUB_MKCONFIG_PATH, "w") as f:
         f.write(cleaned_grub_mkconfig)
 
+
 def get_entry_names(grub_cfg):
     "Gets the entry names from grub.cfg contents"
     pattern = (
-        r"(?P<head>(?:submenu|menuentry) ?)" # menuentry or submenu
-        r"(?:\"|')" # " or '
-        r"(?P<entryname>[^\"']*)" # capture the entry name (without quotes)
-        r"(?:\"|')" # " or '
-        r"(?P<tail>[^\{]*\{)" # The rest of the entry header until a { is found
+        r"(?P<head>(?:submenu|menuentry) ?)"  # menuentry or submenu
+        r"(?:\"|')"  # " or '
+        r"(?P<entryname>[^\"']*)"  # capture the entry name (without quotes)
+        r"(?:\"|')"  # " or '
+        r"(?P<tail>[^\{]*\{)"  # The rest of the entry header until a { is found
     )
     matchiter = re.finditer(pattern, grub_cfg)
     matches = list(matchiter)
     return matches
+
 
 # Main procedures
 
@@ -384,10 +391,11 @@ def do_set_icons():
 def parse_args():
     parser = ArgumentParser(
         description=THEME_DESCRIPTION,
-        epilog=f"Available colors are: {', '.join(AVAILABLE_COLORS)}.\n"
+        epilog=f"[Available colors] are: {', '.join(AVAILABLE_COLORS)}.\n"
         "You can specify your own hex colors as well (e.g. \\#C0FFEE, \\#FF00FF, etc).\n"
-        f"Available icons are: {', '.join(AVAILABLE_ICONS)}\n"
-        "\nFor adding more icons you can do it yourself following this guide:\n"
+        f"[Available fonts] are: {', '.join(AVAILABLE_FONTS)}\n"
+        f"[Available icons] are: {', '.join(AVAILABLE_ICONS)}\n"
+        "For adding more icons you can do it yourself following this guide:\n"
         "https://github.com/mateosss/matter/wiki/How-to-Contribute-an-Icon\n"
         "Or request it (or any other thing) by opening an issue on:\n"
         "https://github.com/mateosss/matter/issues",
@@ -435,7 +443,19 @@ def parse_args():
         default=THEME_DEFAULT_BACKGROUND,
     )
     parser.add_argument(
-        "--font", "-f", type=str, help=f"theme font", default=THEME_DEFAULT_FONT,
+        "--font",
+        "-f",
+        type=str,
+        help=f"theme font from prepackaged fonts",
+        default=THEME_DEFAULT_FONT,
+        choices=AVAILABLE_FONTS,
+    )
+    parser.add_argument(
+        "--fontsize",
+        "-fs",
+        type=int,
+        help=f"theme font size",
+        default=THEME_DEFAULT_FONT_SIZE,
     )
     return parser.parse_args()
 
