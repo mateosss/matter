@@ -267,6 +267,18 @@ def clean_grub_mkconfig():
     with open(GRUB_MKCONFIG_PATH, "w") as f:
         f.write(cleaned_grub_mkconfig)
 
+def get_entry_names(grub_cfg):
+    "Gets the entry names from grub.cfg contents"
+    pattern = (
+        r"(?P<head>(?:submenu|menuentry) ?)" # menuentry or submenu
+        r"(?:\"|')" # " or '
+        r"(?P<entryname>[^\"']*)" # capture the entry name (without quotes)
+        r"(?:\"|')" # " or '
+        r"(?P<tail>[^\{]*\{)" # The rest of the entry header until a { is found
+    )
+    matchiter = re.finditer(pattern, grub_cfg)
+    matches = list(matchiter)
+    return matches
 
 # Main procedures
 
@@ -297,12 +309,9 @@ def do_list_grub_cfg_entries():
     with open(GRUB_CFG_PATH, "r", newline="") as f:
         grub_cfg = f.read()
 
-    # Capture entry matches
-    pattern = r'(?P<head>(?:submenu|menuentry) ?)"(?P<entryname>.*)"(?P<tail>.*\{)'
-    matchiter = re.finditer(pattern, grub_cfg)
-    matches = list(matchiter)
+    entries = get_entry_names(grub_cfg)
 
-    for i, m in enumerate(matches):
+    for i, m in enumerate(entries):
         print(f"{i + 1}. {m['entryname']}")
 
 
@@ -316,23 +325,20 @@ def do_patch_grub_cfg_icons(icons=None):
     with open(GRUB_CFG_PATH, "r", newline="") as f:
         grub_cfg = f.read()
 
-    # Capture entry matches
-    pattern = r'(?P<head>(?:submenu|menuentry) ?)"(?P<entryname>.*)"(?P<tail>.*\{)'
-    matchiter = re.finditer(pattern, grub_cfg)
-    matches = list(matchiter)
+    entries = get_entry_names(grub_cfg)
 
-    if len(icons) != len(matches):
+    if len(icons) != len(entries):
         print(
-            f"[Matter Error] You must specify {len(matches)} icons ({len(icons)} provided) for entries:"
+            f"[Matter Error] You must specify {len(entries)} icons ({len(icons)} provided) for entries:"
         )
-        for i, m in enumerate(matches):
+        for i, m in enumerate(entries):
             print(f"{i + 1}. {m['entryname']}")
         exit(1)
 
     # Build new grub cfg with given icons
     new_grub_cfg = ""
     next_seek = 0
-    for m, i in zip(matches, icons):
+    for m, i in zip(entries, icons):
         mstart, mend = m.span()
         new_grub_cfg += grub_cfg[next_seek:mstart]
         icon_class = f" --class {i} " if i != "_" else ""
