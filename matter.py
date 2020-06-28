@@ -80,8 +80,13 @@ user_args: argparse.Namespace
 
 
 def sh(command):
-    "Executes command in shell"
+    "Executes command in shell and returns its exit status"
     return run(command, shell=True).returncode
+
+
+def shout(command):
+    "Executes command in shell and returns its stdout"
+    return run(command, shell=True).stdout
 
 
 def has_command(command):
@@ -197,14 +202,22 @@ def prepare_source_dir():
     foreground = parse_color(user_args.foreground)
     background = parse_color(user_args.background)
     font = check_font(user_args.font)
+    fontfile = user_args.fontfile
     fontsize = user_args.fontsize
 
     # Generate font file
+    print("[Matter Info] Build font")
     grub_mkfont = "grub-mkfont"
     assert has_command(grub_mkfont), f"{grub_mkfont} command not found in your system"
-    sh(
-        f"{grub_mkfont} -o {INSTALLATION_SOURCE_DIR}/font.pf2 {INSTALLER_DIR}/fonts/{font}.ttf -s {fontsize}"
+    if fontfile is None:  # User did not specify custom font file
+        fontfile = f"{INSTALLER_DIR}/fonts/{font}.ttf"
+    stdout = shout(
+        f"{grub_mkfont} -o {INSTALLATION_SOURCE_DIR}/font.pf2 {fontfile} -s {fontsize}"
     )
+    if stdout:
+        print(f"[Matter Error] {grub_mkfont} execution was not clean")
+        print(f"[Matter Error] for fontfile: {fontfile}")
+        exit(1)
 
     # Parse theme template with user preferences
     with open(THEME_TEMPLATE_PATH, "r", newline="") as f:
@@ -449,6 +462,9 @@ def parse_args():
         help=f"theme font from prepackaged fonts",
         default=THEME_DEFAULT_FONT,
         choices=AVAILABLE_FONTS,
+    )
+    parser.add_argument(
+        "--fontfile", "-ff", type=str, help=f"theme font from custom .ttf file"
     )
     parser.add_argument(
         "--fontsize",
