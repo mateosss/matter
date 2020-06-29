@@ -312,6 +312,11 @@ def do_install():
     update_grub_defaults()
     update_grub_cfg()
     print(f"[Matter Info] {THEME_NAME} succesfully installed.")
+    print()
+    print(f"[Matter Hint] You can now specify icons for your entries:")
+    do_list_grub_cfg_entries()
+    print(f"[Matter Hint] ./matter.py -si icon-for-entry-1 icon-for-entry-2 ...")
+
 
 
 def do_uninstall():
