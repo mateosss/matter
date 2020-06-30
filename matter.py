@@ -21,7 +21,7 @@ THEME_DESCRIPTION = (
     "Running this script without arguments will install the theme."
 )
 THEME_DEFAULT_HIGHLIGHT = "pink"
-THEME_DEFAULT_FOREGROUND = "white-350"
+THEME_DEFAULT_FOREGROUND = "white"
 THEME_DEFAULT_BACKGROUND = "bluegrey-900"
 THEME_DEFAULT_FONT = "googlesans"
 THEME_DEFAULT_FONT_SIZE = 32
