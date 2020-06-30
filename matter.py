@@ -203,12 +203,17 @@ def convert_icon_svg2png(icon_name):
         print(
             "[Matter Warning] Resulting icons could look a bit off, consider installing inkscape"
         )
+    color = (
+        parse_color(user_args.iconcolor)
+        if user_args.iconcolor
+        else parse_color(user_args.foreground)
+    )
     src_path = ICON_SVG_PATHF.format(icon_name)
     dst_path = ICON_PNG_PATHF.format(icon_name)
     command = (
         r"convert -trim -scale 36x36 -extent 72x72 -gravity center "
         r"-define png:color-type=6 -background none -colorspace sRGB -channel RGB "
-        r"-threshold -1 -density 300 -fill \#FFFFFF +opaque none "  # TODO: Editable color
+        rf"-threshold -1 -density 300 -fill \{color} +opaque none "
         rf"{src_path} {dst_path}"
     )
     exit_code = sh(command)
@@ -292,6 +297,7 @@ def prepare_source_dir():
             download_icon(icon)
 
     # Convert icons
+    print(f"[Matter Info] Convert icons.")
     for icon in icons:
         if icon != "_":
             convert_icon_svg2png(icon)
@@ -299,7 +305,7 @@ def prepare_source_dir():
     # Prepare Font
 
     # Generate font file
-    print("[Matter Info] Build font")
+    print("[Matter Info] Build font.")
     grub_mkfont = "grub-mkfont"
     assert has_command(grub_mkfont), f"{grub_mkfont} command not found in your system"
     if fontfile is None:  # User did not specify custom font file
@@ -566,6 +572,12 @@ def parse_args():
         type=str,
         help=f"solid background color",
         default=THEME_DEFAULT_BACKGROUND,
+    )
+    parser.add_argument(
+        "--iconcolor",
+        "-ic",
+        type=str,
+        help=f"icons fill color, by default same as foreground",
     )
     parser.add_argument(
         "--font",
