@@ -89,6 +89,40 @@ user_args: argparse.Namespace
 # Utils
 
 
+def color_string(string, fg=None):
+    COLORS = {  # List some colors that may be needed
+        "red": "\033[31m",
+        "green": "\033[32m",
+        "orange": "\033[33m",
+        "blue": "\033[34m",
+        "cyan": "\033[36m",
+        "lightred": "\033[91m",
+        "lightgreen": "\033[92m",
+        "yellow": "\033[93m",
+        "lightblue": "\033[94m",
+        "lightcyan": "\033[96m",
+    }
+    endcolor = "\033[0m"
+    return f"{COLORS.get(fg, '')}{string}{endcolor}"
+
+
+def info(*lines):
+    for line in lines:
+        print(f"{color_string('[I] ', fg='cyan')}{line}")
+
+
+def error(*lines, should_exit=True):
+    for line in lines:
+        print(f"{color_string('[E] ', fg='lightred')}{line}")
+    if should_exit:
+        exit(1)
+
+
+def warning(*lines):
+    for line in lines:
+        print(f"{color_string('[W] ', fg='yellow')}{line}")
+
+
 def sh(command):
     "Executes command in shell and returns its exit status"
     return run(command, shell=True).returncode
@@ -116,7 +150,7 @@ def check_python_version():
 
 def check_root_or_prompt():
     if os.geteuid() != 0:
-        print(f"[Matter Info] Request root access.")
+        info("Request root access")
         exit_code = sh("sudo -v")
         if exit_code != 0:
             raise Exception(
@@ -168,15 +202,13 @@ def read_cleaned_grub_mkconfig():
 
 
 def download_icon(icon_name):
-    print(f"[Matter Info] Download {icon_name}.svg")
+    info(f"Download {icon_name}.svg")
     url = f"{MDI_CDN}{icon_name}.svg"
     try:
         with request.urlopen(url) as f:
             response = f.read()
     except HTTPError as err:
-        print(f"[Matter Error] Couldn't get icon {icon_name} ({err.reason})")
-        print(f"[Matter Error] At URL {err.geturl()}")
-        exit(1)
+        error(f"Couldn't get icon {icon_name} ({err.reason})", f"At URL {err.geturl()}")
     svg_path = ICON_SVG_PATHF.format(icon_name)
     with open(svg_path, "wb") as f:
         f.write(response)
@@ -198,14 +230,9 @@ def is_icon_downloaded(icon_name):
 
 def convert_icon_svg2png(icon_name):
     if not has_command("convert"):
-        print(
-            "[Matter Error] Stop. The convert command from imagemagick was not found."
-        )
-        exit(1)
+        error("Stop. The convert command from imagemagick was not found")
     if not has_command("inkscape"):
-        print(
-            "[Matter Warning] Resulting icons could look a bit off, consider installing inkscape"
-        )
+        warning("Resulting icons could look a bit off, consider installing inkscape")
     color = (
         parse_color(user_args.iconcolor)
         if user_args.iconcolor
@@ -221,8 +248,7 @@ def convert_icon_svg2png(icon_name):
     )
     exit_code = sh(command)
     if exit_code != 0:
-        print("[Matter Error] Stop. The convert command returned an error.")
-        exit(1)
+        error("Stop. The convert command returned an error")
 
 
 def parse_color(color_string):
@@ -231,28 +257,26 @@ def parse_color(color_string):
     elif re.match(r"\#[0-9A-Fa-f]{6}", color_string) is not None:
         color = color_string
     else:
-        print(f"[Matter Error] Invalid color parsed from {color_string}")
-        print(
-            f"[Matter Error] Color must be an escaped hex code like \\\\#C00FFE or one of: {AVAILABLE_COLORS}."
+        error(
+            f"Invalid color parsed from {color_string}",
+            f"Color must be an escaped hex code like \\\\#C00FFE or one of: {AVAILABLE_COLORS}",
         )
-        exit(1)
     return color
 
 
 def check_icon_downloaded(icon):
     available_icons = get_downloaded_icons()
     if icon not in available_icons + ["_"]:
-        print(f"[Matter Error] Invalid icon name: {icon}.")
-        print(f"[Matter Error] Icons present are: {available_icons}.")
-        exit(1)
+        error(f"Invalid icon name: {icon}", f"Icons present are: {available_icons}")
     return icon
 
 
 def parse_font(font):
     if font not in AVAILABLE_FONTS:
-        print(f"[Matter Error] Invalid font name: {font}.")
-        print(f"[Matter Error] Font name must be one of: {AVAILABLE_FONTS}.")
-        exit(1)
+        error(
+            f"Invalid font name: {font}",
+            f"Font name must be one of: {AVAILABLE_FONTS}",
+        )
     return FONTS[font]
 
 
@@ -260,14 +284,13 @@ def parse_font(font):
 
 
 def clean_install_dir():
-    print("[Matter Info] Clean install directory.")
+    info("Clean install directory")
     if isdir(INSTALLATION_TARGET_DIR):
         rmtree(INSTALLATION_TARGET_DIR)
 
 
 def prepare_source_dir():
-    print("[Matter Info] Build theme from user preferences.")
-
+    info("Build theme from user preferences")
     # Get user color preferences
     highlight = parse_color(user_args.highlight)
     foreground = parse_color(user_args.foreground)
@@ -285,9 +308,9 @@ def prepare_source_dir():
     # Do icon count match grub entry count?
     entries = get_entry_names(grub_cfg)
     if len(icons) != len(entries):
-        print(
-            f"[Matter Error] You must specify {len(entries)} "
-            f"icons ({len(icons)} provided) for entries:"
+        error(
+            f"You must specify {len(entries)} icons ({len(icons)} provided) for entries:",
+            should_exit=False,
         )
         for i, m in enumerate(entries):
             print(f"{i + 1}. {m['entryname']}")
@@ -302,10 +325,11 @@ def prepare_source_dir():
         fontfile = f"{INSTALLER_DIR}/fonts/{fontkey}.ttf"
         fontname = f"{parse_font(fontkey)} {fontsize}"
     elif fontname is None:  # User did, but did not gave its name
-        print("[Matter Error] --fontname/-fn not specified for given font file.")
-        print("[Matter Error] e.g. 'Open Sans Regular'")
-        exit(1)
-    else: # User did specify everything font-related
+        error(
+            "--fontname/-fn not specified for given font file.",
+            "e.g. 'Open Sans Regular'",
+        )
+    else:  # User did specify everything font-related
         fontname = f"{' '.join(fontname)} {fontsize}"
 
     # Prepare Icons
@@ -316,7 +340,7 @@ def prepare_source_dir():
             download_icon(icon)
 
     # Convert icons
-    print(f"[Matter Info] Convert icons.")
+    info("Convert icons")
     for icon in icons:
         if icon != "_":
             convert_icon_svg2png(icon)
@@ -324,14 +348,14 @@ def prepare_source_dir():
     # Prepare Font
 
     # Generate font file
-    print("[Matter Info] Build font.")
+    info("Build font")
     stdout = shout(
         f"{grub_mkfont} -o {INSTALLATION_SOURCE_DIR}/font.pf2 {fontfile} -s {fontsize}"
     )
     if stdout:
-        print(f"[Matter Error] {grub_mkfont} execution was not clean")
-        print(f"[Matter Error] for fontfile: {fontfile}")
-        exit(1)
+        error(
+            f"{grub_mkfont} execution was not clean", f"for fontfile: {fontfile}",
+        )
 
     # Prepare Theme.txt
 
@@ -354,24 +378,24 @@ def prepare_source_dir():
 
 
 def prepare_target_dir():
-    print("[Matter Info] Prepare installation directory.")
+    info("Prepare installation directory")
     clean_install_dir()
 
 
 def copy_source_to_target():
-    print("[Matter Info] Copy built theme to installation directory.")
+    info("Copy built theme to installation directory")
     copytree(INSTALLATION_SOURCE_DIR, INSTALLATION_TARGET_DIR)
 
 
 def update_grub_cfg():
     COMMAND = "update-grub"
-    print(f"[Matter Info] Remake grub.cfg with {COMMAND}.")
+    info(f"Remake grub.cfg with {COMMAND}")
     assert has_command(COMMAND), f"{COMMAND} command not found in your system"
     sh(COMMAND)
 
 
 def update_grub_defaults():
-    print(f"[Matter Info] Patch {GRUB_DEFAULTS_PATH} with {THEME_OVERRIDES_TITLE}.")
+    info(f"Patch {GRUB_DEFAULTS_PATH} with {THEME_OVERRIDES_TITLE}")
     grub_configs = read_cleaned_grub_defaults()
 
     # Parse grub defaults template, append parsed contents, and write back
@@ -390,14 +414,14 @@ def update_grub_defaults():
 
 
 def clean_grub_defaults():
-    print(f"[Matter Info] Clean {THEME_OVERRIDES_TITLE} from {GRUB_DEFAULTS_PATH}.")
+    info(f"Clean {THEME_OVERRIDES_TITLE} from {GRUB_DEFAULTS_PATH}")
     cleaned_grub_defaults = read_cleaned_grub_defaults()
     with open(GRUB_DEFAULTS_PATH, "w") as f:
         f.write(cleaned_grub_defaults)
 
 
 def clean_grub_mkconfig():
-    print(f"[Matter Info] Clean {THEME_OVERRIDES_TITLE} from {GRUB_MKCONFIG_PATH}.")
+    info(f"Clean {THEME_OVERRIDES_TITLE} from {GRUB_MKCONFIG_PATH}")
     cleaned_grub_mkconfig = read_cleaned_grub_mkconfig()
     with open(GRUB_MKCONFIG_PATH, "w") as f:
         f.write(cleaned_grub_mkconfig)
@@ -421,18 +445,18 @@ def get_entry_names(grub_cfg):
 
 
 def do_preinstall_hint():
-    print(f"[Matter Info] Argument -i required. Which icons go to which grub entries?.")
-    print(f"[Matter Info] Your grub entries are:")
+    info("Argument -i required. Which icons go to which grub entries?.")
+    info("Your grub entries are:")
     do_list_grub_cfg_entries()
-    print(f"[Matter Info] Look for icons you like at https://materialdesignicons.com/")
-    print(f'[Matter Info] Then install with (you can use "_" for an empty icon):')
-    print(f"[Matter Info] ./matter.py -i icon-for-entry-1 icon-for-entry-2 ...")
-    print(f"[Matter Info] Example (with 8 entries):")
-    print(f"[Matter Info] ./matter.py -i ubuntu microsoft-windows folder _ _ _ _ cog")
+    info("Look for icons you like at https://materialdesignicons.com/")
+    info('Then install with (you can use "_" for an empty icon):')
+    info("./matter.py -i icon-for-entry-1 icon-for-entry-2 ...")
+    info("Example (with 8 entries):")
+    info("./matter.py -i ubuntu microsoft-windows folder _ _ _ _ cog")
 
 
 def do_install():
-    print(f"[Matter Info] Begin {THEME_NAME} install.")
+    info(f"Begin {THEME_NAME} install")
     check_root_or_prompt()
     prepare_source_dir()
     prepare_target_dir()
@@ -440,17 +464,17 @@ def do_install():
     update_grub_defaults()
     do_set_icons()
     update_grub_cfg()
-    print(f"[Matter Info] {THEME_NAME} succesfully installed.")
+    info(f"{THEME_NAME} succesfully installed")
 
 
 def do_uninstall():
-    print(f"[Matter Info] Begin {THEME_NAME} uninstall.")
+    info(f"Begin {THEME_NAME} uninstall")
     check_root_or_prompt()
     clean_grub_defaults()
     clean_grub_mkconfig()
     clean_install_dir()
     update_grub_cfg()
-    print(f"[Matter Info] {THEME_NAME} succesfully uninstalled.")
+    info(f"{THEME_NAME} succesfully uninstalled")
 
 
 def do_list_grub_cfg_entries():
@@ -465,11 +489,10 @@ def do_list_grub_cfg_entries():
 
 
 def do_patch_grub_cfg_icons():
-    print(f"[Matter Info] Begin {GRUB_CFG_PATH} patch.")
+    info(f"Begin {GRUB_CFG_PATH} patch")
     icons = user_args.icons
     if icons is None:
-        print(f"[Matter Error] Stop. Unspecified icons (--icons/-i argument).")
-        exit(1)
+        error("Stop. Unspecified icons (--icons/-i argument)")
     icons = [check_icon_downloaded(i) for i in icons]
 
     # Read current grub cfg
@@ -478,9 +501,10 @@ def do_patch_grub_cfg_icons():
 
     entries = get_entry_names(grub_cfg)
     if len(icons) != len(entries):
-        print(
-            f"[Matter Error] You must specify {len(entries)} "
-            f"icons ({len(icons)} provided) for entries:"
+        error(
+            f"You must specify {len(entries)}"
+            f"icons ({len(icons)} provided) for entries:",
+            should_exit=False,
         )
         for i, m in enumerate(entries):
             print(f"{i + 1}. {m['entryname']}")
@@ -502,7 +526,7 @@ def do_patch_grub_cfg_icons():
     with open(GRUB_CFG_PATH, "w") as f:
         f.write(new_grub_cfg)
 
-    print(f"[Matter Info] {len(icons)} icons succesfully patched onto {GRUB_CFG_PATH}.")
+    info(f"{len(icons)} icons succesfully patched onto {GRUB_CFG_PATH}")
 
 
 def do_set_icons():
@@ -510,8 +534,9 @@ def do_set_icons():
     do_patch_grub_cfg_icons()
 
     # Patch grub-mkconfig so everytime it executes, it patches grub.cfg
-    print(f"[Matter Info] Begin {GRUB_MKCONFIG_PATH} patch.")
-    print(f"[Matter Info] Clean old {GRUB_MKCONFIG_PATH} patch if any.")
+    info(f"Begin {GRUB_MKCONFIG_PATH} patch")
+    info(f"Clean old {GRUB_MKCONFIG_PATH} patch if any")
+
     cmd_icons = " ".join(user_args.icons)
     seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} -so -i {cmd_icons} >&2"
     new_grub_mkconfig = read_cleaned_grub_mkconfig()
@@ -523,8 +548,8 @@ def do_set_icons():
     with open(GRUB_MKCONFIG_PATH, "w") as f:
         f.write(new_grub_mkconfig)
 
-    print(
-        f"[Matter Info] {GRUB_MKCONFIG_PATH} succesfully patched, icons should now persist between grub updates."
+    info(
+        f"{GRUB_MKCONFIG_PATH} succesfully patched, icons will now persist between grub updates."
     )
 
 
