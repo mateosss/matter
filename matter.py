@@ -4,8 +4,10 @@ import sys
 import os
 import re
 import argparse
+import urllib.request as request
+from urllib.error import HTTPError
 from argparse import ArgumentParser, RawTextHelpFormatter
-from os.path import dirname, basename, isdir
+from os.path import dirname, basename, isdir, exists
 from subprocess import run, check_call
 from shutil import which, rmtree, copytree
 
@@ -41,6 +43,9 @@ THEME_OVERRIDES_TITLE = f"{THEME_NAME} Theme Overrides"
 BEGIN_THEME_OVERRIDES = f"### BEGIN {THEME_OVERRIDES_TITLE}"
 END_THEME_OVERRIDES = f"### END {THEME_OVERRIDES_TITLE}"
 
+ICON_SVG_PATHF = f"{INSTALLER_DIR}/icons/{{}}.svg"
+ICON_PNG_PATHF = f"{INSTALLATION_SOURCE_DIR}/icons/{{}}.png"
+
 PALETTE = {
     "red": "#f44336",
     "pink": "#e91e63",
@@ -67,11 +72,15 @@ PALETTE = {
     "white-350": "#9E9E9E",
     "bluegrey-900": "#263238",
 }
-# Get available icons from Matter/icons/*.png by removing .png extension
-AVAILABLE_ICONS = [i[:-4] for i in os.listdir(f"{INSTALLATION_SOURCE_DIR}/icons/")]
 # Get available fonts from fonts/*.ttf by removing .ttf extension
-AVAILABLE_FONTS = [i[:-4] for i in os.listdir(f"{INSTALLER_DIR}/fonts/")]
+AVAILABLE_FONTS = [
+    filename[:-4]  # Remove .ttf
+    for filename in os.listdir(f"{INSTALLER_DIR}/fonts/")
+    if filename.endswith(".ttf")
+]
 AVAILABLE_COLORS = list(PALETTE.keys())
+
+MDI_CDN = "https://raw.githubusercontent.com/Templarian/MaterialDesign-SVG/master/svg/"
 
 # Global user arguments set in main()
 user_args: argparse.Namespace
@@ -155,6 +164,59 @@ def read_cleaned_grub_mkconfig():
     return cleaned_grub_mkconfig
 
 
+def download_icon(icon_name):
+    print(f"[Matter Info] Download {icon_name}.svg")
+    url = f"{MDI_CDN}{icon_name}.svg"
+    try:
+        with request.urlopen(url) as f:
+            response = f.read()
+    except HTTPError as err:
+        print(f"[Matter Error] Couldn't get icon {icon_name} ({err.reason})")
+        print(f"[Matter Error] At URL {err.geturl()}")
+        exit(1)
+    svg_path = ICON_SVG_PATHF.format(icon_name)
+    with open(svg_path, "wb") as f:
+        f.write(response)
+    return svg_path
+
+
+def get_downloaded_icons():
+    return [
+        filename[:-4]  # Remove .png
+        for filename in os.listdir(f"{INSTALLATION_SOURCE_DIR}/icons/")
+        if filename.endswith(".png")
+    ]
+
+
+def is_icon_downloaded(icon_name):
+    svg_path = ICON_SVG_PATHF.format(icon_name)
+    return exists(svg_path)
+
+
+def convert_icon_svg2png(icon_name):
+    if not has_command("convert"):
+        print(
+            "[Matter Error] Stop. The convert command from imagemagick was not found."
+        )
+        exit(1)
+    if not has_command("inkscape"):
+        print(
+            "[Matter Warning] Resulting icons could look a bit off, consider installing inkscape"
+        )
+    src_path = ICON_SVG_PATHF.format(icon_name)
+    dst_path = ICON_PNG_PATHF.format(icon_name)
+    command = (
+        r"convert -trim -scale 36x36 -extent 72x72 -gravity center "
+        r"-define png:color-type=6 -background none -colorspace sRGB -channel RGB "
+        r"-threshold -1 -density 300 -fill \#FFFFFF +opaque none "  # TODO: Editable color
+        rf"{src_path} {dst_path}"
+    )
+    exit_code = sh(command)
+    if exit_code != 0:
+        print("[Matter Error] Stop. The convert command returned an error.")
+        exit(1)
+
+
 def parse_color(color_string):
     if color_string in AVAILABLE_COLORS:
         color = PALETTE[color_string]
@@ -169,10 +231,11 @@ def parse_color(color_string):
     return color
 
 
-def check_icon(icon):
-    if icon not in AVAILABLE_ICONS + ["_"]:
+def check_icon_downloaded(icon):
+    available_icons = get_downloaded_icons()
+    if icon not in available_icons + ["_"]:
         print(f"[Matter Error] Invalid icon name: {icon}.")
-        print(f"[Matter Error] Icon name must be one of: {AVAILABLE_ICONS}.")
+        print(f"[Matter Error] Icons present are: {available_icons}.")
         exit(1)
     return icon
 
@@ -204,6 +267,36 @@ def prepare_source_dir():
     font = check_font(user_args.font)
     fontfile = user_args.fontfile
     fontsize = user_args.fontsize
+    icons = user_args.icons
+
+    # Prepare Icons
+
+    # Do icon count match grub entry count?
+    # Read entries from grub.cfg
+    with open(GRUB_CFG_PATH, "r", newline="") as f:
+        grub_cfg = f.read()
+
+    entries = get_entry_names(grub_cfg)
+    if len(icons) != len(entries):
+        print(
+            f"[Matter Error] You must specify {len(entries)} "
+            f"icons ({len(icons)} provided) for entries:"
+        )
+        for i, m in enumerate(entries):
+            print(f"{i + 1}. {m['entryname']}")
+        exit(1)
+
+    # Download not-yet-downloaded icons
+    for icon in icons:
+        if not is_icon_downloaded(icon) and icon != "_":
+            download_icon(icon)
+
+    # Convert icons
+    for icon in icons:
+        if icon != "_":
+            convert_icon_svg2png(icon)
+
+    # Prepare Font
 
     # Generate font file
     print("[Matter Info] Build font")
@@ -218,6 +311,8 @@ def prepare_source_dir():
         print(f"[Matter Error] {grub_mkfont} execution was not clean")
         print(f"[Matter Error] for fontfile: {fontfile}")
         exit(1)
+
+    # Prepare Theme.txt
 
     # Parse theme template with user preferences
     with open(THEME_TEMPLATE_PATH, "r", newline="") as f:
@@ -303,6 +398,17 @@ def get_entry_names(grub_cfg):
 # Main procedures
 
 
+def do_preinstall_hint():
+    print(f"[Matter Info] Argument -i required. Which icons go to which grub entries?.")
+    print(f"[Matter Info] Your grub entries are:")
+    do_list_grub_cfg_entries()
+    print(f"[Matter Info] Look for icons you like at https://materialdesignicons.com/")
+    print(f'[Matter Info] Then install with (you can use "_" for an empty icon):')
+    print(f"[Matter Info] ./matter.py -i icon-for-entry-1 icon-for-entry-2 ...")
+    print(f"[Matter Info] Example (with 8 entries):")
+    print(f"[Matter Info] ./matter.py -i ubuntu microsoft-windows folder _ _ _ _ cog")
+
+
 def do_install():
     print(f"[Matter Info] Begin {THEME_NAME} install.")
     check_root_or_prompt()
@@ -310,13 +416,9 @@ def do_install():
     prepare_target_dir()
     copy_source_to_target()
     update_grub_defaults()
+    do_set_icons()
     update_grub_cfg()
     print(f"[Matter Info] {THEME_NAME} succesfully installed.")
-    print()
-    print(f"[Matter Hint] You can now specify icons for your entries:")
-    do_list_grub_cfg_entries()
-    print(f"[Matter Hint] ./matter.py -si icon-for-entry-1 icon-for-entry-2 ...")
-
 
 
 def do_uninstall():
@@ -340,21 +442,23 @@ def do_list_grub_cfg_entries():
         print(f"{i + 1}. {m['entryname']}")
 
 
-def do_patch_grub_cfg_icons(icons=None):
+def do_patch_grub_cfg_icons():
     print(f"[Matter Info] Begin {GRUB_CFG_PATH} patch.")
-    icons = icons if icons is not None else user_args.seticons_once
-    assert icons is not None
-    icons = [check_icon(i) for i in icons]
+    icons = user_args.icons
+    if icons is None:
+        print(f"[Matter Error] Stop. Unspecified icons (--icons/-i argument).")
+        exit(1)
+    icons = [check_icon_downloaded(i) for i in icons]
 
     # Read current grub cfg
     with open(GRUB_CFG_PATH, "r", newline="") as f:
         grub_cfg = f.read()
 
     entries = get_entry_names(grub_cfg)
-
     if len(icons) != len(entries):
         print(
-            f"[Matter Error] You must specify {len(entries)} icons ({len(icons)} provided) for entries:"
+            f"[Matter Error] You must specify {len(entries)} "
+            f"icons ({len(icons)} provided) for entries:"
         )
         for i, m in enumerate(entries):
             print(f"{i + 1}. {m['entryname']}")
@@ -381,14 +485,13 @@ def do_patch_grub_cfg_icons(icons=None):
 
 def do_set_icons():
     # Patch grub.cfg
-    icons = user_args.seticons or []
-    do_patch_grub_cfg_icons(icons)
+    do_patch_grub_cfg_icons()
 
     # Patch grub-mkconfig so everytime it executes, it patches grub.cfg
     print(f"[Matter Info] Begin {GRUB_MKCONFIG_PATH} patch.")
     print(f"[Matter Info] Clean old {GRUB_MKCONFIG_PATH} patch if any.")
-    cmd_icons = " ".join(icons)
-    seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} -so {cmd_icons} >&2"
+    cmd_icons = " ".join(user_args.icons)
+    seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} -so -i {cmd_icons} >&2"
     new_grub_mkconfig = read_cleaned_grub_mkconfig()
     new_grub_mkconfig += (
         f"\n\n{BEGIN_THEME_OVERRIDES}\n{seticons_call}\n{END_THEME_OVERRIDES}\n\n"
@@ -412,10 +515,9 @@ def parse_args():
         epilog=f"[Available colors] are: {', '.join(AVAILABLE_COLORS)}.\n"
         "You can specify your own hex colors as well (e.g. \\#C0FFEE, \\#FF00FF, etc).\n"
         f"[Available fonts] are: {', '.join(AVAILABLE_FONTS)}\n"
-        f"[Available icons] are: {', '.join(AVAILABLE_ICONS)}\n"
-        "For adding more icons you can do it yourself following this guide:\n"
-        "https://github.com/mateosss/matter/wiki/How-to-Contribute-an-Icon\n"
-        "Or request it (or any other thing) by opening an issue on:\n"
+        "You can always specify your own with the -ff argument\n"
+        f"[Available icons] can be found at https://materialdesignicons.com/\n"
+        "For requests open an issue on:\n"
         "https://github.com/mateosss/matter/issues",
         formatter_class=RawTextHelpFormatter,
     )
@@ -423,18 +525,23 @@ def parse_args():
         "--listentries", "-l", action="store_true", help=f"list grub entries",
     )
     parser.add_argument(
-        "--seticons",
-        "-si",
+        "--icons",
+        "-i",
         type=str,
         nargs="*",
-        help=f"set grub entries icons and patch grub-mkconfig for persistence",
+        help=f"specify icons for each grub entry listed with -l",
+    )
+    parser.add_argument(
+        "--seticons",
+        "-si",
+        action="store_true",
+        help=f"set grub entries icons given by -i and patch grub-mkconfig for persistence",
     )
     parser.add_argument(
         "--seticons_once",
         "-so",
-        type=str,
-        nargs="*",
-        help=f"set grub entries icons, will be reverted on next grub update",
+        action="store_true",
+        help=f"set grub entries icons given by -i, will be reverted on next grub update",
     )
     parser.add_argument(
         "--uninstall", "-u", action="store_true", help=f"uninstall {THEME_NAME}",
@@ -487,11 +594,13 @@ if __name__ == "__main__":
 
     if user_args.listentries:
         do_list_grub_cfg_entries()
-    elif user_args.seticons is not None:
-        do_set_icons()
-    elif user_args.seticons_once is not None:
+    elif user_args.seticons_once:
         do_patch_grub_cfg_icons()
+    elif user_args.seticons:
+        do_set_icons()
     elif user_args.uninstall:
         do_uninstall()
+    elif user_args.icons is None:
+        do_preinstall_hint()
     else:
         do_install()
