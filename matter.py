@@ -8,7 +8,7 @@ import urllib.request as request
 from urllib.error import HTTPError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from os.path import dirname, basename, isdir, exists
-from subprocess import run, check_call
+from subprocess import run, check_call, PIPE
 from shutil import which, rmtree, copytree
 
 # Configuration constants
@@ -72,12 +72,13 @@ PALETTE = {
     "white-350": "#9E9E9E",
     "bluegrey-900": "#263238",
 }
+FONTS = {
+    "amaticsc": "Amatic SC Regular",
+    "googlesans": "Google Sans Regular",
+}
+
 # Get available fonts from fonts/*.ttf by removing .ttf extension
-AVAILABLE_FONTS = [
-    filename[:-4]  # Remove .ttf
-    for filename in os.listdir(f"{INSTALLER_DIR}/fonts/")
-    if filename.endswith(".ttf")
-]
+AVAILABLE_FONTS = list(FONTS.keys())
 AVAILABLE_COLORS = list(PALETTE.keys())
 
 MDI_CDN = "https://raw.githubusercontent.com/Templarian/MaterialDesign-SVG/master/svg/"
@@ -95,7 +96,9 @@ def sh(command):
 
 def shout(command):
     "Executes command in shell and returns its stdout"
-    return run(command, shell=True).stdout
+    stdout = run(command, shell=True, stdout=PIPE).stdout.decode("utf-8")
+    print(stdout)
+    return stdout
 
 
 def has_command(command):
@@ -245,12 +248,12 @@ def check_icon_downloaded(icon):
     return icon
 
 
-def check_font(font):
+def parse_font(font):
     if font not in AVAILABLE_FONTS:
         print(f"[Matter Error] Invalid font name: {font}.")
         print(f"[Matter Error] Font name must be one of: {AVAILABLE_FONTS}.")
         exit(1)
-    return font
+    return FONTS[font]
 
 
 # Procedures
@@ -269,18 +272,17 @@ def prepare_source_dir():
     highlight = parse_color(user_args.highlight)
     foreground = parse_color(user_args.foreground)
     background = parse_color(user_args.background)
-    font = check_font(user_args.font)
+    fontkey = user_args.font
     fontfile = user_args.fontfile
+    fontname = user_args.fontname
     fontsize = user_args.fontsize
     icons = user_args.icons
 
-    # Prepare Icons
-
-    # Do icon count match grub entry count?
+    # Icon checks
     # Read entries from grub.cfg
     with open(GRUB_CFG_PATH, "r", newline="") as f:
         grub_cfg = f.read()
-
+    # Do icon count match grub entry count?
     entries = get_entry_names(grub_cfg)
     if len(icons) != len(entries):
         print(
@@ -290,6 +292,23 @@ def prepare_source_dir():
         for i, m in enumerate(entries):
             print(f"{i + 1}. {m['entryname']}")
         exit(1)
+
+    # Font checks
+    # grub-mkfont present
+    grub_mkfont = "grub-mkfont"
+    assert has_command(grub_mkfont), f"{grub_mkfont} command not found in your system"
+    # Valid font arguments
+    if fontfile is None:  # User did not specify custom font file
+        fontfile = f"{INSTALLER_DIR}/fonts/{fontkey}.ttf"
+        fontname = f"{parse_font(fontkey)} {fontsize}"
+    elif fontname is None:  # User did, but did not gave its name
+        print("[Matter Error] --fontname/-fn not specified for given font file.")
+        print("[Matter Error] e.g. 'Open Sans Regular'")
+        exit(1)
+    else: # User did specify everything font-related
+        fontname = f"{' '.join(fontname)} {fontsize}"
+
+    # Prepare Icons
 
     # Download not-yet-downloaded icons
     for icon in icons:
@@ -306,10 +325,6 @@ def prepare_source_dir():
 
     # Generate font file
     print("[Matter Info] Build font.")
-    grub_mkfont = "grub-mkfont"
-    assert has_command(grub_mkfont), f"{grub_mkfont} command not found in your system"
-    if fontfile is None:  # User did not specify custom font file
-        fontfile = f"{INSTALLER_DIR}/fonts/{font}.ttf"
     stdout = shout(
         f"{grub_mkfont} -o {INSTALLATION_SOURCE_DIR}/font.pf2 {fontfile} -s {fontsize}"
     )
@@ -329,6 +344,7 @@ def prepare_source_dir():
         "highlight": highlight,
         "foreground": foreground,
         "background": background,
+        "fontname": fontname,
     }
     parsed_theme = template.format(**context)
 
@@ -589,6 +605,13 @@ def parse_args():
     )
     parser.add_argument(
         "--fontfile", "-ff", type=str, help=f"theme font from custom .ttf file"
+    )
+    parser.add_argument(
+        "--fontname",
+        "-fn",
+        type=str,
+        nargs="*",
+        help=f"specify the font name for the given font file",
     )
     parser.add_argument(
         "--fontsize",
