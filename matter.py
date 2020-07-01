@@ -455,6 +455,21 @@ def do_preinstall_hint():
     info("./matter.py -i ubuntu microsoft-windows folder _ _ _ _ cog")
 
 
+def do_test():
+    info("Begin grub2-theme-preview")
+    warning(
+        "Argument --icons/-i does not have effect when testing",
+        "The icon names used are coming from your system's current grub.cfg",
+        "This is a feature that may work in the future",
+    )
+    if not has_command("grub2-theme-preview"):
+        error(
+            "You need grub2-theme-preview for testing",
+            "See https://github.com/hartwork/grub2-theme-preview",
+        )
+    sh(f"grub2-theme-preview {INSTALLATION_SOURCE_DIR}")
+
+
 def do_install():
     info(f"Begin {THEME_NAME} install")
     prepare_source_dir()
@@ -578,6 +593,12 @@ def parse_args():
         help=f"prepare the theme but do not install it",
     )
     parser.add_argument(
+        "--test",
+        "-t",
+        action="store_true",
+        help=f"test the generated theme with grub2-theme-preview",
+    )
+    parser.add_argument(
         "--icons",
         "-i",
         type=str,
@@ -672,3 +693,6 @@ if __name__ == "__main__":
         do_preinstall_hint()
     else:
         do_install()
+
+    if user_args.test:
+        do_test()
