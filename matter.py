@@ -457,8 +457,8 @@ def do_preinstall_hint():
 
 def do_install():
     info(f"Begin {THEME_NAME} install")
-    check_root_or_prompt()
     prepare_source_dir()
+    check_root_or_prompt()
     prepare_target_dir()
     copy_source_to_target()
     update_grub_defaults()
@@ -572,6 +572,12 @@ def parse_args():
         "--listentries", "-l", action="store_true", help=f"list grub entries",
     )
     parser.add_argument(
+        "--buildonly",
+        "-b",
+        action="store_true",
+        help=f"prepare the theme but do not install it",
+    )
+    parser.add_argument(
         "--icons",
         "-i",
         type=str,
@@ -654,6 +660,8 @@ if __name__ == "__main__":
 
     if user_args.listentries:
         do_list_grub_cfg_entries()
+    elif user_args.buildonly:
+        prepare_source_dir()
     elif user_args.seticons_once:
         do_patch_grub_cfg_icons()
     elif user_args.seticons:
