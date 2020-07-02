@@ -9,7 +9,7 @@ from urllib.error import HTTPError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from os.path import dirname, basename, isdir, exists
 from subprocess import run, check_call, PIPE
-from shutil import which, rmtree, copytree
+from shutil import which, rmtree, copytree, copyfile
 
 # Configuration constants
 
@@ -20,17 +20,18 @@ THEME_DESCRIPTION = (
     "Matter is a minimalist grub theme originally inspired by material design 2.\n"
     "Run this script without arguments for next steps on installing Matter."
 )
-THEME_DEFAULT_HIGHLIGHT = "pink"
-THEME_DEFAULT_FOREGROUND = "white"
-THEME_DEFAULT_BACKGROUND = "bluegrey-900"
-THEME_DEFAULT_FONT = "googlesans"
-THEME_DEFAULT_FONT_SIZE = 32
-
 INSTALLER_NAME = basename(__file__)
 
 INSTALLER_DIR = dirname(os.path.realpath(INSTALLER_NAME))
 INSTALLATION_SOURCE_DIR = f"{INSTALLER_DIR}/{THEME_NAME}"
 INSTALLATION_TARGET_DIR = f"/boot/grub/themes/{THEME_NAME}"
+
+THEME_DEFAULT_HIGHLIGHT = "pink"
+THEME_DEFAULT_FOREGROUND = "white"
+THEME_DEFAULT_BACKGROUND = "bluegrey-900"
+THEME_DEFAULT_FONT_NAME = "Google Sans Regular"
+THEME_DEFAULT_FONT = THEME_DEFAULT_FONT_NAME.replace(" ", "_")
+THEME_DEFAULT_FONT_SIZE = 32
 
 GRUB_DEFAULTS_PATH = f"/etc/default/grub"
 GRUB_CFG_PATH = f"/boot/grub/grub.cfg"
@@ -72,13 +73,6 @@ PALETTE = {
     "white-350": "#9E9E9E",
     "bluegrey-900": "#263238",
 }
-FONTS = {
-    "amaticsc": "Amatic SC Regular",
-    "googlesans": "Google Sans Regular",
-}
-
-# Get available fonts from fonts/*.ttf by removing .ttf extension
-AVAILABLE_FONTS = list(FONTS.keys())
 AVAILABLE_COLORS = list(PALETTE.keys())
 
 MDI_CDN = "https://raw.githubusercontent.com/Templarian/MaterialDesign-SVG/master/svg/"
@@ -215,7 +209,7 @@ def download_icon(icon_name):
     return svg_path
 
 
-def get_downloaded_icons():
+def get_converted_icons():
     return [
         filename[:-4]  # Remove .png
         for filename in os.listdir(f"{INSTALLATION_SOURCE_DIR}/icons/")
@@ -251,6 +245,15 @@ def convert_icon_svg2png(icon_name):
         error("Stop. The convert command returned an error")
 
 
+def get_available_fonts():
+    "Returns the fonts present in /fonts"
+    return [
+        filename[:-4]  # Remove .ttf
+        for filename in os.listdir(f"{INSTALLER_DIR}/fonts/")
+        if filename.endswith(".ttf")
+    ]
+
+
 def parse_color(color_string):
     if color_string in AVAILABLE_COLORS:
         color = PALETTE[color_string]
@@ -264,20 +267,22 @@ def parse_color(color_string):
     return color
 
 
-def check_icon_downloaded(icon):
-    available_icons = get_downloaded_icons()
+def check_icon_converted(icon):
+    available_icons = get_converted_icons()
     if icon not in available_icons + ["_"]:
         error(f"Invalid icon name: {icon}", f"Icons present are: {available_icons}")
     return icon
 
 
 def parse_font(font):
-    if font not in AVAILABLE_FONTS:
+    """From a given --font check if available and return its font name
+    e.g. Open_Sans_Regular to Open Sans Regular"""
+    available_fonts = get_available_fonts()
+    if font not in available_fonts:
         error(
-            f"Invalid font name: {font}",
-            f"Font name must be one of: {AVAILABLE_FONTS}",
+            f"Invalid font name: {font}", f"Available font names: {available_fonts}",
         )
-    return FONTS[font]
+    return font.replace("_", " ")
 
 
 # Procedures
@@ -324,13 +329,19 @@ def prepare_source_dir():
     if fontfile is None:  # User did not specify custom font file
         fontfile = f"{INSTALLER_DIR}/fonts/{fontkey}.ttf"
         fontname = f"{parse_font(fontkey)} {fontsize}"
+    elif not fontfile.endswith(".ttf"):  # font file is not ttf
+        error(f"{fontfile} is not a .ttf file")
     elif fontname is None:  # User did, but did not gave its name
         error(
             "--fontname/-fn not specified for given font file.",
             "e.g. 'Open Sans Regular'",
         )
-    else:  # User did specify everything font-related
-        fontname = f"{' '.join(fontname)} {fontsize}"
+    else:  # User specified a custom fontfile
+        fontname = " ".join(fontname)  # e.g. Open Sans Regular
+        dst_fontfile = f"{INSTALLER_DIR}/fonts/{fontname.replace(' ', '_')}.ttf"  # e.g. .../Open_Sans_Regular.ttf
+        copyfile(fontfile, dst_fontfile)
+        fontfile = dst_fontfile
+        fontname = f"{fontname} {fontsize}"  # e.g. Open Sans Regular 32
 
     # Prepare Icons
 
@@ -508,7 +519,7 @@ def do_patch_grub_cfg_icons():
     icons = user_args.icons
     if icons is None:
         error("Stop. Unspecified icons (--icons/-i argument)")
-    icons = [check_icon_downloaded(i) for i in icons]
+    icons = [check_icon_converted(i) for i in icons]
 
     # Read current grub cfg
     with open(GRUB_CFG_PATH, "r", newline="") as f:
@@ -576,7 +587,7 @@ def parse_args():
         description=THEME_DESCRIPTION,
         epilog=f"[Available colors] are: {', '.join(AVAILABLE_COLORS)}.\n"
         "You can specify your own hex colors as well (e.g. \\#C0FFEE, \\#FF00FF, etc).\n"
-        f"[Available fonts] are: {', '.join(AVAILABLE_FONTS)}\n"
+        f"[Available fonts] are: {', '.join(get_available_fonts())}\n"
         "You can always specify your own with the -ff argument\n"
         f"[Available icons] can be found at https://materialdesignicons.com/\n"
         "For requests open an issue on:\n"
@@ -651,12 +662,12 @@ def parse_args():
         "--font",
         "-f",
         type=str,
-        help=f"theme font from prepackaged fonts",
+        help=f"theme font from already downloaded fonts",
         default=THEME_DEFAULT_FONT,
-        choices=AVAILABLE_FONTS,
+        choices=get_available_fonts(),
     )
     parser.add_argument(
-        "--fontfile", "-ff", type=str, help=f"theme font from custom .ttf file"
+        "--fontfile", "-ff", type=str, help=f"import theme font from custom .ttf file"
     )
     parser.add_argument(
         "--fontname",
