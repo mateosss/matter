@@ -18,7 +18,7 @@ MIN_PYTHON_VERSION = (3, 6)  # Mainly for f-strings
 THEME_NAME = "Matter"
 THEME_DESCRIPTION = (
     "Matter is a minimalist grub theme originally inspired by material design 2.\n"
-    "Running this script without arguments will install the theme."
+    "Run this script without arguments for next steps on installing Matter."
 )
 THEME_DEFAULT_HIGHLIGHT = "pink"
 THEME_DEFAULT_FOREGROUND = "white"
