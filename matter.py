@@ -48,30 +48,30 @@ ICON_SVG_PATHF = f"{INSTALLER_DIR}/icons/{{}}.svg"
 ICON_PNG_PATHF = f"{INSTALLATION_SOURCE_DIR}/icons/{{}}.png"
 
 PALETTE = {
-    "red": "#f44336",
-    "pink": "#e91e63",
-    "purple": "#9c27b0",
-    "deeppurple": "#673ab7",
-    "indigo": "#3f51b5",
-    "blue": "#2196f3",
-    "lightblue": "#03a9f4",
-    "cyan": "#00bcd4",
-    "teal": "#009688",
-    "green": "#4caf50",
-    "lightgreen": "#8bc34a",
-    "lime": "#cddc39",
-    "yellow": "#ffeb3b",
-    "amber": "#ffc107",
-    "orange": "#ff9800",
-    "deeporange": "#ff5722",
-    "brown": "#795548",
-    "grey": "#9e9e9e",
-    "bluegrey": "#607d8b",
-    "white": "#ffffff",
-    "black": "#000000",
+    "red": "f44336",
+    "pink": "e91e63",
+    "purple": "9c27b0",
+    "deeppurple": "673ab7",
+    "indigo": "3f51b5",
+    "blue": "2196f3",
+    "lightblue": "03a9f4",
+    "cyan": "00bcd4",
+    "teal": "009688",
+    "green": "4caf50",
+    "lightgreen": "8bc34a",
+    "lime": "cddc39",
+    "yellow": "ffeb3b",
+    "amber": "ffc107",
+    "orange": "ff9800",
+    "deeporange": "ff5722",
+    "brown": "795548",
+    "grey": "9e9e9e",
+    "bluegrey": "607d8b",
+    "white": "ffffff",
+    "black": "000000",
     # Custom default colors
-    "white-350": "#9E9E9E",
-    "bluegrey-900": "#263238",
+    "white-350": "9E9E9E",
+    "bluegrey-900": "263238",
 }
 AVAILABLE_COLORS = list(PALETTE.keys())
 
@@ -257,14 +257,14 @@ def get_available_fonts():
 def parse_color(color_string):
     if color_string in AVAILABLE_COLORS:
         color = PALETTE[color_string]
-    elif re.match(r"\#[0-9A-Fa-f]{6}", color_string) is not None:
+    elif re.match(r"[0-9A-Fa-f]{6}", color_string) is not None:
         color = color_string
     else:
         error(
             f"Invalid color parsed from {color_string}",
-            f"Color must be an escaped hex code like \\\\#C00FFE or one of: {AVAILABLE_COLORS}",
+            f"Color must be an hex code like C00FFE or one of: {AVAILABLE_COLORS}",
         )
-    return color
+    return f"#{color}"
 
 
 def check_icon_converted(icon):
@@ -456,13 +456,17 @@ def get_entry_names(grub_cfg):
 
 
 def do_preinstall_hint():
+    info(
+        f"[{color_string(THEME_NAME.upper(), fg='pink')} "
+        f"{color_string('Grub Theme'.upper(), fg='orange')}]"
+    )
     info("Argument -i required. Which icons go to which grub entries?.")
     info("Your grub entries are:")
     do_list_grub_cfg_entries()
     info("Look for icons you like at https://materialdesignicons.com/")
-    info('Then install with (you can use "_" for an empty icon):')
+    info("Then install with:")
     info("./matter.py -i icon-for-entry-1 icon-for-entry-2 ...")
-    info("Example (with 8 entries):")
+    info("Example (with 8 entries, _ means ignore):")
     info("./matter.py -i ubuntu microsoft-windows folder _ _ _ _ cog")
 
 
@@ -586,7 +590,7 @@ def parse_args():
     parser = ArgumentParser(
         description=THEME_DESCRIPTION,
         epilog=f"[Available colors] are: {', '.join(AVAILABLE_COLORS)}.\n"
-        "You can specify your own hex colors as well (e.g. \\#C0FFEE, \\#FF00FF, etc).\n"
+        "You can specify your own hex colors as well (e.g. C0FFEE, FF00FF, etc).\n"
         f"[Available fonts] are: {', '.join(get_available_fonts())}\n"
         "You can always specify your own with the -ff argument\n"
         f"[Available icons] can be found at https://materialdesignicons.com/\n"
