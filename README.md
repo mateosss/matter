@@ -66,18 +66,18 @@ this one:
 5. Ubuntu, with Linux 5.3.0-61-generic (recovery mode)
 6. Ubuntu, with Linux 5.3.0-59-generic
 7. Ubuntu, with Linux 5.3.0-59-generic (recovery mode)
-10. System Setup
+8. System Setup
 ```
 
 Now you should pick some icons from <https://materialdesignicons.com> for each entry
 listed, (you only need the icon's name, use the search panel and hover over any
 icon you like to see its name). In these example I will pick `ubuntu` for entry
 1, `microsoft-windows` for 2, `folder` for 3 (as it is a submenu in my
-particular case), and `cog` for 10, I don't care about all the remaining entries
+particular case), and `cog` for 8, I don't care about all the remaining entries
 so I will just use "`_`" (underscore) for those.
 
 ```sh
-# Installs matter with the icons matching the entries
+# Installs matter with icons matching the corresponding entries
 ./matter.py -i ubuntu microsoft-windows folder _ _ _ _ cog
 ```
 
@@ -106,19 +106,19 @@ font size like so:
 - `--fontfile/-ff`: The `.ttf` path
 - `--fontname/-fn`: The name of the font, in this case `Cinzel Regular` but
   could be `Open Sans Bold` (*Tip: If you don't know the font name, you can
-  specify any name, go to the grub, press C to open console, and type lsfonts to
-  list the font names*)
+  specify any name, go to the grub, press C to open console, and type `lsfonts`
+  to list the font names*)
 - `--fontsize/-fs`: By default it is 32, recommended values are multiples of 4.
 - `--font/-f`: This argument is not used in this example as it is used to select
   prepackaged fonts. Note that after giving a ttf file to `-ff`, matter will
-  save it as a prepackaged font, so it can be accessed with this flag. See
-  prepackaged (available) fonts at the end of `--help/-h` output
+  save it as a prepackaged font, so it could be referenced later on with this
+  flag. See prepackaged (available) fonts at the end of `--help/-h` output
 
 *Tip: [Google Fonts](https://fonts.google.com/) is a good place to get fonts*
 
 ## Colors
 
-You can specify 4 colors `--foreground/-fg`, `--background/-bg`,
+You can specify the color of 4 elements: `--foreground/-fg`, `--background/-bg`,
 `--iconcolor/-ic` and `--highlight/-hl` (selected text color), there are some
 Material Design colors prepackaged that you can see at the end of the
 `--help/-h` output, you can also specify custom colors. Here is an example of
@@ -131,9 +131,9 @@ the syntax:
 ## Testing Without Rebooting
 
 If you install the `pip` package
-[`grub2-theme-preview`](https://github.com/hartwork/grub2-theme-preview)
-(<https://github.com/hartwork/grub2-theme-preview>) you can test combinations of
-fonts and colors with the `--buildonly/-b` and `--test/-t` flags like so:
+[`grub2-theme-preview`](https://github.com/hartwork/grub2-theme-preview) you can
+test combinations of fonts and colors with the `--buildonly/-b` and `--test/-t`
+flags like so:
 
 ```sh
 ./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
@@ -146,7 +146,7 @@ fonts and colors with the `--buildonly/-b` and `--test/-t` flags like so:
 
 # What does Matter do to my system files?
 
-Besides the need for the installer files to be in a persistent location, Matter
+Besides the need for the extracted files to be in a persistent location, Matter
 needs to edit three files:
 
 1. `/etc/default/grub`: For setting theme and resolution.
@@ -157,11 +157,10 @@ Also it places the theme files in `/boot/grub/themes/Matter/`, this one is
 standard to grub themes in general.
 
 Both **(1)** and **(3)** are clearly distinguished with special `BEGIN`/`END`
-comments at the end of file. **(2)** Adds a `--class` flag to each entry, but it
-can be rebuilt as new from `grub-mkconfig`.
+comments at the end of each file. **(2)** Adds a `--class` flag to each entry,
+but it can be restored as new with `update-grub`.
 
-*All of these modifications are **completely** cleaned up by uninstalling with
-the script*
+*All of these modifications are **completely** cleaned up by uninstalling*
 
 # Gallery
 
