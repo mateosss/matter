@@ -20,8 +20,9 @@ requests.
   - [Testing Without Rebooting](#testing-without-rebooting)
 - [What does Matter do to my system
   files?](#what-does-matter-do-to-my-system-files)
-- [Gallery](#gallery): [1](#1), [2](#2), [3](#3), [4](#4), [5](#5), [6](#6),
-  [7](#7), [8](#8), [9](#9), [10](#10)
+- [Gallery](#gallery): [1](#example-1), [2](#example-2), [3](#example-3),
+  [4](#example-4), [5](#example-5), [6](#example-6), [7](#example-7),
+  [8](#example-8), [9](#example-9), [10](#example-10)
 - [Contributing](#contributing)
 - [Thanks](#thanks)
 
@@ -70,7 +71,7 @@ this one:
 10. System Setup
 ```
 
-Now you should pick some icons from materialdesignicons.com for each entry
+Now you should pick some icons from <https://materialdesignicons.com> for each entry
 listed, (you only need the icon's name, use the search panel and hover over any
 icon you like to see its name). In these example I will pick `ubuntu` for entry
 1, `microsoft-windows` for 2, `folder` for 3 (as it is a submenu in my
@@ -169,7 +170,7 @@ the script*
 Here are some examples with their respective commands that you can copy or get
 inspired from.
 
-## 1
+## Example 1
 
 ![Example 1](.docs/gallery1.gif)
 
@@ -184,7 +185,7 @@ inspired from.
 -fn Josefin Sans Regular -fs 32
 ```
 
-## 2
+## Example 2
 
 ![Example 2](.docs/gallery2.png)
 
@@ -197,7 +198,7 @@ inspired from.
 -fn Comfortaa Regular -fs 32
 ```
 
-## 3
+## Example 3
 
 ![Example 3](.docs/gallery3.png)
 
@@ -210,7 +211,7 @@ inspired from.
 -fn Lobster Regular -fs 32
 ```
 
-## 4
+## Example 4
 
 ![Example 4](.docs/gallery4.gif)
 
@@ -228,7 +229,7 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 
 ```
 
-## 5
+## Example 5
 
 ![Example 5](.docs/gallery5.png)
 
@@ -241,7 +242,7 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 -fn Poiret One Regular -fs 48
 ```
 
-## 6
+## Example 6
 
 ![Example 6](.docs/gallery6.png)
 
@@ -255,7 +256,7 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 -fn Josefin Sans Regular -fs 32
 ```
 
-## 7
+## Example 7
 
 ![Example 7](.docs/gallery7.png)
 
@@ -268,7 +269,7 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 -fn Josefin Slab Bold -fs 36
 ```
 
-## 8
+## Example 8
 
 ![Example 8](.docs/gallery8.png)
 
@@ -282,7 +283,7 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 -fn MuseoModerno Regular -fs 32
 ```
 
-## 9
+## Example 9
 
 ![Example 9](.docs/gallery9.png)
 
@@ -295,7 +296,7 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 -fn Amatic SC Regular -fs 64
 ```
 
-## 10
+## Example 10
 
 ![Example 10](.docs/gallery10.gif)
 
