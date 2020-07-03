@@ -12,19 +12,18 @@ requests.
 - [Matter](#matter)
 - **[Download](#download)**
 - [Usage](#usage)
-    - [Help](#help)
-    - **[Quick Start](#quick-start)**
-    - [Uninstall](#uninstall)
-    - [Fonts](#fonts)
-    - [Colors](#colors)
-    - [Testing Without Rebooting](#testing-without-rebooting)
-- [What does Matter do to my system files?](#what-does-matter-do-to-my-system-files)
+  - [Help](#help)
+  - **[Quick Start](#quick-start)**
+  - [Uninstall](#uninstall)
+  - [Fonts](#fonts)
+  - [Colors](#colors)
+  - [Testing Without Rebooting](#testing-without-rebooting)
+- [What does Matter do to my system
+  files?](#what-does-matter-do-to-my-system-files)
 - [Gallery](#gallery): [1](#1), [2](#2), [3](#3), [4](#4), [5](#5), [6](#6),
   [7](#7), [8](#8), [9](#9), [10](#10)
 - [Contributing](#contributing)
 - [Thanks](#thanks)
-
-
 
 # Download
 
@@ -102,7 +101,7 @@ specify your own fonts by giving a `.ttf` file, the font name, and an optional
 font size like so:
 
 ```sh
-./matter.py -ff ~/Desktop/fonts/Cinzel/Cinzel-Regular.ttf -fn Cinzel Regular -fs 40
+./matter.py -ff ~/fonts/Cinzel/Cinzel-Regular.ttf -fn Cinzel Regular -fs 40
 ```
 
 - `--fontfile/-ff`: The `.ttf` path
@@ -140,7 +139,7 @@ fonts and colors with the `--buildonly/-b` and `--test/-t` flags like so:
 ```sh
 ./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -hl FFC107 -fg white -bg 2196F3 \
--ff ~/Desktop/fonts/MuseoModerno/static/MuseoModerno-Regular.ttf \
+-ff ~/fonts/MuseoModerno/static/MuseoModerno-Regular.ttf \
 -fn MuseoModerno Regular -fs 40
 ```
 
@@ -179,9 +178,9 @@ inspired from.
 
 ```sh
 # Light version, invert -fg and -bg for dark one
-./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -hl ef233c -fg 2b2d42 -bg edf2f4 \
--ff ~/Desktop/fonts/Josefin_Sans/static/JosefinSans-Regular.ttf \
+-ff ~/fonts/Josefin_Sans/static/JosefinSans-Regular.ttf \
 -fn Josefin Sans Regular -fs 32
 ```
 
@@ -192,9 +191,9 @@ inspired from.
 *Font: [Comfortaa Medium 500](https://fonts.google.com/specimen/Comfortaa)*
 
 ```sh
-./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -hl white -fg f0f0f0 -bg ff0d7b \
--ff ~/Desktop/fonts/Comfortaa/static/Comfortaa-Medium.ttf \
+-ff ~/fonts/Comfortaa/static/Comfortaa-Medium.ttf \
 -fn Comfortaa Regular -fs 32
 ```
 
@@ -205,9 +204,9 @@ inspired from.
 *Font: [Lobster Regular 400](https://fonts.google.com/specimen/Lobster)*
 
 ```sh
-./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -hl 118ab2 -fg ffd166 -bg 073b4c \
--ff ~/Desktop/fonts/Lobster/Lobster-Regular.ttf \
+-ff ~/fonts/Lobster/Lobster-Regular.ttf \
 -fn Lobster Regular -fs 32
 ```
 
@@ -220,11 +219,11 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 
 ```sh
 # Using Bebas Neue font (more compact), the other uses Russo One
-./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -hl 2c251b -fg 2c251b -bg ffe70b \
--ff ~/Desktop/fonts/Bebas_Neue/BebasNeue-Regular.ttf \
+-ff ~/fonts/Bebas_Neue/BebasNeue-Regular.ttf \
 -fn Bebas Neue Regular -fs 36
-# -ff ~/Desktop/fonts/Russo_One/RussoOne-Regular.ttf \
+# -ff ~/fonts/Russo_One/RussoOne-Regular.ttf \
 # -fn Russo One Regular -fs 36
 
 ```
@@ -236,9 +235,9 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 *Font: [Poiret One Regular 400](https://fonts.google.com/specimen/Poiret+One)*
 
 ```sh
-./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -hl black -fg 101010 -bg fce1e0 \
--ff ~/Desktop/fonts/Poiret_One/PoiretOne-Regular.ttf \
+-ff ~/fonts/Poiret_One/PoiretOne-Regular.ttf \
 -fn Poiret One Regular -fs 48
 ```
 
@@ -250,9 +249,9 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 500](https://fonts.google.com/specimen/Josefin+Sans)*
 
 ```sh
-./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -hl ffe78a -fg fdf7f9 -bg 582335 \
--ff ~/Desktop/fonts/Josefin_Sans/static/JosefinSans-Medium.ttf \
+-ff ~/fonts/Josefin_Sans/static/JosefinSans-Medium.ttf \
 -fn Josefin Sans Regular -fs 32
 ```
 
@@ -263,9 +262,9 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 *Font: [Josefin Slab Bold 700](https://fonts.google.com/specimen/Josefin+Slab)*
 
 ```sh
-./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -hl A4E11E -fg white -bg 5b1ee1 \
--ff ~/Desktop/fonts/Josefin_Slab/JosefinSlab-Bold.ttf \
+-ff ~/fonts/Josefin_Slab/JosefinSlab-Bold.ttf \
 -fn Josefin Slab Bold -fs 36
 ```
 
@@ -273,12 +272,13 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 
 ![Example 8](.docs/gallery8.png)
 
-*Font: [MuseoModerno Regular 400](https://fonts.google.com/specimen/MuseoModerno)*
+*Font: [MuseoModerno Regular
+400](https://fonts.google.com/specimen/MuseoModerno)*
 
 ```sh
-./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -hl FFC107 -fg white -bg 2196F3 \
--ff ~/Desktop/fonts/MuseoModerno/static/MuseoModerno-Regular.ttf \
+-ff ~/fonts/MuseoModerno/static/MuseoModerno-Regular.ttf \
 -fn MuseoModerno Regular -fs 32
 ```
 
@@ -289,9 +289,9 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 *Font: [Amatic SC Regular 400](https://fonts.google.com/specimen/Amatic+SC)*
 
 ```sh
-./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -bg FFF8E1 -fg 263238 -hl E91E63 \
--ff ~/Desktop/fonts/Amatic_SC/AmaticSC-Regular.ttf \
+-ff ~/fonts/Amatic_SC/AmaticSC-Regular.ttf \
 -fn Amatic SC Regular -fs 64
 ```
 
@@ -303,9 +303,9 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 
 ```sh
 # This is the light version, the dark one uses -bg 1a1d21 -fg c9a45b instead
-./matter.py -t -b -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
 -hl c28f2c -bg white -fg d0a85c \
--ff ~/Desktop/fonts/Cinzel/Cinzel-Regular.ttf \
+-ff ~/fonts/Cinzel/Cinzel-Regular.ttf \
 -fn Cinzel Regular -fs 40
 # -hl c28f2c -bg 1a1d21 -fg c9a45b \
 ```
@@ -314,10 +314,11 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 
 Feel free to submit any pull request that improves in any way the project.
 
-Read the wiki <https://github.com/mateosss/matter/wiki>, that's where any useful information for developers will reside.
+Read the wiki <https://github.com/mateosss/matter/wiki>, that's where any useful
+information for developers will reside.
 
-If you think you got a nice result out of Matter and would like to share it, please create an issue with it! I would
-love to see your results.
+If you think you got a nice result out of Matter and would like to share it,
+please create an issue with it! I would love to see your results.
 
 # Thanks
 
