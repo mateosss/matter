@@ -28,9 +28,7 @@ requests.
 
 # Download
 
-[Click here to download Matter zip
-file](https://github.com/mateosss/matter/archive/master.zip) or just get the
-repo.
+[Click here to download Matter](https://github.com/mateosss/matter/releases/latest/download/matter.zip)
 
 It is **strongly adviced** to put the downloaded files in some folder that will
 not get deleted, as the main script `matter.py` is needed for future grub
