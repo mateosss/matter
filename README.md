@@ -35,6 +35,18 @@ not get deleted, as the main script `matter.py` is needed for future grub
 updates made by your system. Also if you wan't to uninstall matter you should do
 it from there as well.
 
+## Dependencies
+
+Matter will inform you of any missing dependencies, but here is a list anyways:
+
+- `inkscape` (**Main dependency**): This brings the `convert` command from
+  `imagemagick` with best svg to png conversion.
+- `update-grub`, `grub-mkconfig`, and `grub-mkfont`: General grub utilities
+  needed, if you don't have these, please create an issue with more information
+  about your system as I've only worked on systems that have these commands.
+- `grub2-theme-preview` (Optional): For testing results (`--test/-t` argument)
+  without rebooting.
+
 # Usage
 
 ## Help

@@ -219,7 +219,10 @@ def is_icon_downloaded(icon_name):
 
 def convert_icon_svg2png(icon_name):
     if not has_command("convert"):
-        error("Stop. The convert command from imagemagick was not found")
+        error(
+            "Stop. The `convert` command from imagemagick was not found",
+            "Consider installing `inkscape`",
+        )
     if not has_command("inkscape"):
         warning("Resulting icons could look a bit off, consider installing inkscape")
     color = (
