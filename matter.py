@@ -20,9 +20,9 @@ THEME_DESCRIPTION = (
     "Matter is a minimalist grub theme originally inspired by material design 2.\n"
     "Run this script without arguments for next steps on installing Matter."
 )
-INSTALLER_NAME = basename(__file__)
-
-INSTALLER_DIR = dirname(os.path.realpath(INSTALLER_NAME))
+INSTALLER_ABSPATH = os.path.abspath(__file__)
+INSTALLER_NAME = basename(INSTALLER_ABSPATH)
+INSTALLER_DIR = dirname(INSTALLER_ABSPATH)
 INSTALLATION_SOURCE_DIR = f"{INSTALLER_DIR}/{THEME_NAME}"
 INSTALLATION_TARGET_DIR = f"/boot/grub/themes/{THEME_NAME}"
 
