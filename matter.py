@@ -137,9 +137,7 @@ def check_python_version():
     installed = (sys.version_info.major, sys.version_info.minor)
     required = MIN_PYTHON_VERSION
     if installed < required:
-        raise Exception(
-            f"[Matter Error] Python {required[0]}.{required[1]} or later required."
-        )
+        error(f"Python {required[0]}.{required[1]} or later required")
 
 
 def check_root_or_prompt():
@@ -147,9 +145,7 @@ def check_root_or_prompt():
         info("Request root access")
         exit_code = sh("sudo -v")
         if exit_code != 0:
-            raise Exception(
-                "[Matter Error] Could not verify root access, you could try with sudo."
-            )
+            error("Could not verify root access, you could try with sudo")
         # Relaunch the program with sudo
         args = " ".join(sys.argv[1:])
         child_exit_code = sh(f"sudo {INSTALLER_DIR}/{INSTALLER_NAME} {args}")
@@ -177,9 +173,8 @@ def read_cleaned_grub_defaults():
 
 
 def read_cleaned_grub_mkconfig():
-    assert (
-        GRUB_MKCONFIG_PATH is not None
-    ), "grub-mkconfig command is not present in your system"
+    if GRUB_MKCONFIG_PATH is None:
+        error("grub-mkconfig command is not present in your system")
 
     # Read previous defaults
     with open(GRUB_MKCONFIG_PATH, "r", newline="") as f:
@@ -324,7 +319,8 @@ def prepare_source_dir():
     # Font checks
     # grub-mkfont present
     grub_mkfont = "grub-mkfont"
-    assert has_command(grub_mkfont), f"{grub_mkfont} command not found in your system"
+    if not has_command(grub_mkfont):
+        error(f"{grub_mkfont} command not found in your system")
     # Valid font arguments
     if fontfile is None:  # User did not specify custom font file
         fontfile = f"{INSTALLER_DIR}/fonts/{fontkey}.ttf"
@@ -401,7 +397,8 @@ def copy_source_to_target():
 def update_grub_cfg():
     COMMAND = "update-grub"
     info(f"Remake grub.cfg with {COMMAND}")
-    assert has_command(COMMAND), f"{COMMAND} command not found in your system"
+    if not has_command(COMMAND):
+        error(f"{COMMAND} command not found in your system")
     sh(COMMAND)
 
 
