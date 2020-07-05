@@ -532,13 +532,15 @@ def do_patch_grub_cfg_icons():
     entries = get_entry_names(grub_cfg)
     if len(icons) != len(entries):
         error(
-            f"You must specify {len(entries)}"
+            f"You must specify {len(entries)} "
             f"icons ({len(icons)} provided) for entries:",
             should_exit=False,
         )
         for i, m in enumerate(entries):
             print(f"{i + 1}. {m['entryname']}")
-        exit(1)
+        # NOTE: We exit with 0 here to not stop the apt upgrade process
+        # eventually it will be solved with an autoremove
+        exit(0)
 
     # Build new grub cfg with given icons
     new_grub_cfg = ""
