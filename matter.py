@@ -399,10 +399,15 @@ def copy_source_to_target():
 
 def update_grub_cfg():
     COMMAND = "update-grub"
-    info(f"Remake grub.cfg with {COMMAND}")
-    if not has_command(COMMAND):
-        error(f"{COMMAND} command not found in your system")
-    sh(COMMAND)
+    ALT_COMMAND = "grub-mkconfig"
+    info(f"Update grub.cfg")
+    command = COMMAND
+    if not has_command(command):
+        if not has_command(ALT_COMMAND):
+            error(f"{COMMAND} and {ALT_COMMAND} command not found in your system")
+        command = f"{ALT_COMMAND} -o {GRUB_CFG_PATH}"
+    info(f"Remake grub.cfg with {command}")
+    sh(command)
 
 
 def update_grub_defaults():
