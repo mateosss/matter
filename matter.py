@@ -20,11 +20,55 @@ THEME_DESCRIPTION = (
     "Matter is a minimalist grub theme originally inspired by material design 2.\n"
     "Run this script without arguments for next steps on installing Matter."
 )
+
+# Logging utils
+
+def color_string(string, fg=None):
+    COLORS = {  # List some colors that may be needed
+        "red": "\033[31m",
+        "green": "\033[32m",
+        "orange": "\033[33m",
+        "blue": "\033[34m",
+        "cyan": "\033[36m",
+        "lightred": "\033[91m",
+        "lightgreen": "\033[92m",
+        "yellow": "\033[93m",
+        "lightblue": "\033[94m",
+        "lightcyan": "\033[96m",
+    }
+    endcolor = "\033[0m"
+    return f"{COLORS.get(fg, '')}{string}{endcolor}"
+
+
+def info(*lines):
+    for line in lines:
+        print(f"{color_string('[I] ', fg='cyan')}{line}")
+
+
+def error(*lines, should_exit=True):
+    for line in lines:
+        print(f"{color_string('[E] ', fg='lightred')}{line}")
+    if should_exit:
+        exit(1)
+
+
+def warning(*lines):
+    for line in lines:
+        print(f"{color_string('[W] ', fg='yellow')}{line}")
+
+
+if exists("/boot/grub"):
+    BOOT_GRUB_PATH = "/boot/grub"
+elif exists("/boot/grub2"):
+    BOOT_GRUB_PATH = "/boot/grub2"
+else:
+    error("Could not find your grub's boot path (tried /boot/grub and /boot/grub2)")
+
 INSTALLER_ABSPATH = os.path.abspath(__file__)
 INSTALLER_NAME = basename(INSTALLER_ABSPATH)
 INSTALLER_DIR = dirname(INSTALLER_ABSPATH)
 INSTALLATION_SOURCE_DIR = f"{INSTALLER_DIR}/{THEME_NAME}"
-INSTALLATION_TARGET_DIR = f"/boot/grub/themes/{THEME_NAME}"
+INSTALLATION_TARGET_DIR = f"{BOOT_GRUB_PATH}/themes/{THEME_NAME}"
 
 THEME_DEFAULT_HIGHLIGHT = "pink"
 THEME_DEFAULT_FOREGROUND = "white"
@@ -34,8 +78,11 @@ THEME_DEFAULT_FONT = THEME_DEFAULT_FONT_NAME.replace(" ", "_")
 THEME_DEFAULT_FONT_SIZE = 32
 
 GRUB_DEFAULTS_PATH = f"/etc/default/grub"
-GRUB_CFG_PATH = f"/boot/grub/grub.cfg"
-GRUB_MKCONFIG_PATH = which("grub-mkconfig")
+GRUB_CFG_PATH = f"{BOOT_GRUB_PATH}/grub.cfg"
+GRUB_MKCONFIG_PATH = which("grub-mkconfig") or which("grub2-mkconfig")
+if GRUB_MKCONFIG_PATH is None:
+    error("Could not find grub-mkconfig command file (grub2-mkconfig neither)")
+
 
 THEME_TEMPLATE_PATH = f"{INSTALLER_DIR}/theme.txt.template"
 GRUB_DEFAULTS_TEMPLATE_PATH = f"{INSTALLER_DIR}/grub.template"
@@ -81,40 +128,6 @@ MDI_CDN = "https://raw.githubusercontent.com/Templarian/MaterialDesign-SVG/maste
 user_args: argparse.Namespace
 
 # Utils
-
-
-def color_string(string, fg=None):
-    COLORS = {  # List some colors that may be needed
-        "red": "\033[31m",
-        "green": "\033[32m",
-        "orange": "\033[33m",
-        "blue": "\033[34m",
-        "cyan": "\033[36m",
-        "lightred": "\033[91m",
-        "lightgreen": "\033[92m",
-        "yellow": "\033[93m",
-        "lightblue": "\033[94m",
-        "lightcyan": "\033[96m",
-    }
-    endcolor = "\033[0m"
-    return f"{COLORS.get(fg, '')}{string}{endcolor}"
-
-
-def info(*lines):
-    for line in lines:
-        print(f"{color_string('[I] ', fg='cyan')}{line}")
-
-
-def error(*lines, should_exit=True):
-    for line in lines:
-        print(f"{color_string('[E] ', fg='lightred')}{line}")
-    if should_exit:
-        exit(1)
-
-
-def warning(*lines):
-    for line in lines:
-        print(f"{color_string('[W] ', fg='yellow')}{line}")
 
 
 def sh(command):
@@ -173,9 +186,6 @@ def read_cleaned_grub_defaults():
 
 
 def read_cleaned_grub_mkconfig():
-    if GRUB_MKCONFIG_PATH is None:
-        error("grub-mkconfig command is not present in your system")
-
     # Read previous defaults
     with open(GRUB_MKCONFIG_PATH, "r", newline="") as f:
         grub_mkconfig = f.read()
@@ -221,7 +231,7 @@ def convert_icon_svg2png(icon_name):
     if not has_command("convert"):
         error(
             "Stop. The `convert` command from imagemagick was not found",
-            "Consider installing `inkscape`",
+            "Also consider installing `inkscape` for the best results",
         )
     if not has_command("inkscape"):
         warning("Resulting icons could look a bit off, consider installing inkscape")
@@ -321,9 +331,9 @@ def prepare_source_dir():
 
     # Font checks
     # grub-mkfont present
-    grub_mkfont = "grub-mkfont"
-    if not has_command(grub_mkfont):
-        error(f"{grub_mkfont} command not found in your system")
+    grub_mkfont = which("grub-mkfont") or which("grub2-mkfont")
+    if grub_mkfont is None:
+        error(f"grub-mkfont command not found in your system (grub2-mkfont neither)")
     # Valid font arguments
     if fontfile is None:  # User did not specify custom font file
         fontfile = f"{INSTALLER_DIR}/fonts/{fontkey}.ttf"
@@ -398,14 +408,11 @@ def copy_source_to_target():
 
 
 def update_grub_cfg():
-    COMMAND = "update-grub"
-    ALT_COMMAND = "grub-mkconfig"
-    info(f"Update grub.cfg")
-    command = COMMAND
-    if not has_command(command):
-        if not has_command(ALT_COMMAND):
-            error(f"{COMMAND} and {ALT_COMMAND} command not found in your system")
-        command = f"{ALT_COMMAND} -o {GRUB_CFG_PATH}"
+    info("Update grub.cfg")
+    update_command = which("update-grub") or which("grub-mkconfig") or which("grub2-mkconfig")
+    if update_command is None:
+        error(f"Command for generating grub.cfg not found (tried update-grub, grub-mkconfig and grub2-mkconfig)")
+    command = f"{update_command} -o {GRUB_CFG_PATH}" 
     info(f"Remake grub.cfg with {command}")
     sh(command)
 
