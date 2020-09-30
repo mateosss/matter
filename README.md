@@ -57,10 +57,19 @@ help.
 
 ## Quick Start
 
-*Note for Fedora users: Matter does not yet support [The Boot Loader
+<details>
+
+<summary>Note for Fedora users (click to show)</summary>
+
+*Matter does not yet support [The Boot Loader
 Specification](https://systemd.io/BOOT_LOADER_SPECIFICATION/) so before executing
 `matter.py` you should set `GRUB_ENABLE_BLSCFG="false"` in `/etc/default/grub` and then
 update your grub file with `sudo grub2-mkconfig -o /boot/grub2/grub.cfg`*
+
+*See [this issue](https://github.com/mateosss/matter/issues/41) for updates
+or if you want to help out with fedora support*
+
+</details>
 
 Following is a Matter installation with default values. Don't worry, it is very
 easy to rollback or overwrite this installation later if you wan't to.
