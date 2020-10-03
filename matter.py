@@ -11,6 +11,14 @@ from os.path import dirname, basename, isdir, exists
 from subprocess import run, check_call, PIPE
 from shutil import which, rmtree, copytree, copyfile
 
+# Set up dependencies
+try:
+	run("pip")
+except FileNotFoundError:
+	print("No pip, installing grub2-theme-preview manually")
+	os.chmod("./dependencies/install", 0o755)
+	run("./dependencies/install")
+
 # Configuration constants
 
 MIN_PYTHON_VERSION = (3, 6)  # Mainly for f-strings

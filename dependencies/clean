@@ -1,0 +1,3 @@
+#!/bin/bash
+
+rm -rvf dependencies/{usr,grub2*}

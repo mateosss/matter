@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd dependencies
+wget https://files.pythonhosted.org/packages/ea/82/dff14ee13f20393811f01e036417757e714dbc2fe2293d128166014469a8/grub2-theme-preview-2.0.1.tar.gz
+tar xvf grub2-theme-preview-2.0.1.tar.gz
+cd grub2-theme-preview-2.0.1
+python3 setup.py install --root "../"
