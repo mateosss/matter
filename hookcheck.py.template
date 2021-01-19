@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+
+"""
+This template file goes into /etc/grub.d/99_matter
+It checks that the theme is still hooked to grub-mkconfig.
+Hooks it back again if not.
+
+This is a template file, be careful of your use of curly braces Use {{ and }} instead.
+
+# About /etc/grub.d
+Files in /etc/grub.d run in the order of their prefix number.
+We use the 99 number because the hook should be run after the entire grub.cfg file is generated.
+Everything echoed to stdout is written to /boot/grub/grub.cfg after the previous files.
+Everything echoed to stderr is shown to the user wherever there is a grub update.
+This script does not write to stdout.
+More @ https://www.gnu.org/software/grub/manual/grub/grub.html#Simple-configuration
+
+# Why this script exists?
+Files in /etc/grub.d are not erased after your distro upgrades the grub package.
+As this theme relies on being hooked to the grub-mkconfig file (i.e. executed by it)
+and grub package upgrades restore the mkconfig file, this file detects
+when the grub-mkconfig file has been restored and then hook the theme back onto it.
+"""
+
+import re
+from subprocess import run
+from sys import stderr
+
+GRUB_MKCONFIG_PATH = "{GRUB_MKCONFIG_PATH}"
+THEME_NAME = "{THEME_NAME}"
+THEME_OVERRIDES_TITLE = "{THEME_OVERRIDES_TITLE}"
+BEGIN_THEME_OVERRIDES = "{BEGIN_THEME_OVERRIDES}"
+END_THEME_OVERRIDES = "{END_THEME_OVERRIDES}"
+SETICONS_CALL = "{SETICONS_CALL}"
+
+
+def info(msg):
+    # info with cyan [I]
+    print(f"\033[36m[I]\033[0m {{msg}}", file=stderr)
+
+
+def sh(command):
+    "Executes command in shell and returns its exit status"
+    return run(command, shell=True).returncode
+
+
+with open(GRUB_MKCONFIG_PATH, "r", newline="") as f:
+    grub_mkconfig = f.read()
+
+theme_overrides = f"\n*{{BEGIN_THEME_OVERRIDES}}.*{{END_THEME_OVERRIDES}}\n*"
+theme_hooked = re.search(theme_overrides, grub_mkconfig, flags=re.DOTALL) is not None
+
+if theme_hooked:
+    info(f"Found {{GRUB_MKCONFIG_PATH}} hook")
+    exit(0)
+
+info(f"Hook back onto {{GRUB_MKCONFIG_PATH}}")
+
+grub_mkconfig += (
+    f"\n\n{{BEGIN_THEME_OVERRIDES}}\n{{SETICONS_CALL}}\n{{END_THEME_OVERRIDES}}\n\n"
+)
+
+with open(GRUB_MKCONFIG_PATH, "w") as f:
+    f.write(grub_mkconfig)
+
+info(
+    f"{{GRUB_MKCONFIG_PATH}} succesfully patched, icons will now persist between grub updates."
+)
+
+
+# Lastly call the hook as mkconfig is currently running and should be loaded in memory.
+# NOTE: Some bash interpreters seem to not load the entire script in memory
+# so appending commands to the end of the script at runtime will indeed make
+# mkconfig run them. That's what's happening is you see the
+# 'grub.cfg icons patched' message twice
+sh(SETICONS_CALL)

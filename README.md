@@ -178,13 +178,14 @@ needs to edit three files:
 1. `/etc/default/grub`: For setting theme and resolution.
 2. `/boot/grub/grub.cfg`: For setting icons.
 3. `/usr/sbin/grub-mkconfig`: For making icons persistent across grub updates.
+4. `/etc/grub.d/99_matter`: For making icons persistent across grub upgrades.
 
 Also it places the theme files in `/boot/grub/themes/Matter/`, this one is
 standard to grub themes in general.
 
 Both **(1)** and **(3)** are clearly distinguished with special `BEGIN`/`END`
 comments at the end of each file. **(2)** Adds a `--class` flag to each entry,
-but it can be restored as new with `update-grub`.
+but it can be restored as new with `update-grub`. And **(4)** is a custom file.
 
 *All of these modifications are **completely** cleaned up by uninstalling*
 

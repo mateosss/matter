@@ -78,6 +78,7 @@ THEME_DEFAULT_FONT = THEME_DEFAULT_FONT_NAME.replace(" ", "_")
 THEME_DEFAULT_FONT_SIZE = 32
 
 GRUB_DEFAULTS_PATH = f"/etc/default/grub"
+GRUB_SCRIPTS_PATH = f"/etc/grub.d"
 GRUB_CFG_PATH = f"{BOOT_GRUB_PATH}/grub.cfg"
 GRUB_MKCONFIG_PATH = which("grub-mkconfig") or which("grub2-mkconfig")
 if GRUB_MKCONFIG_PATH is None:
@@ -86,6 +87,7 @@ if GRUB_MKCONFIG_PATH is None:
 
 THEME_TEMPLATE_PATH = f"{INSTALLER_DIR}/theme.txt.template"
 GRUB_DEFAULTS_TEMPLATE_PATH = f"{INSTALLER_DIR}/grub.template"
+HOOKCHECK_TEMPLATE_PATH = f"{INSTALLER_DIR}/hookcheck.py.template"
 
 THEME_OVERRIDES_TITLE = f"{THEME_NAME} Theme Overrides"
 BEGIN_THEME_OVERRIDES = f"### BEGIN {THEME_OVERRIDES_TITLE}"
@@ -412,7 +414,7 @@ def update_grub_cfg():
     update_command = which("update-grub") or which("grub-mkconfig") or which("grub2-mkconfig")
     if update_command is None:
         error(f"Command for generating grub.cfg not found (tried update-grub, grub-mkconfig and grub2-mkconfig)")
-    command = f"{update_command} -o {GRUB_CFG_PATH}" 
+    command = f"{update_command} -o {GRUB_CFG_PATH}"
     info(f"Remake grub.cfg with {command}")
     sh(command)
 
@@ -448,6 +450,13 @@ def clean_grub_mkconfig():
     cleaned_grub_mkconfig = read_cleaned_grub_mkconfig()
     with open(GRUB_MKCONFIG_PATH, "w") as f:
         f.write(cleaned_grub_mkconfig)
+
+
+def clean_hookcheck():
+    info(f"Remove hookcheck script from {GRUB_SCRIPTS_PATH}")
+    hookcheck = f"{GRUB_SCRIPTS_PATH}/99_matter"
+    if exists(hookcheck):
+        os.remove(hookcheck)
 
 
 def get_entry_names(grub_cfg):
@@ -505,6 +514,7 @@ def do_install():
     copy_source_to_target()
     update_grub_defaults()
     do_set_icons()
+    install_hookcheck()
     update_grub_cfg()
     info(f"{THEME_NAME} succesfully installed")
 
@@ -514,6 +524,7 @@ def do_uninstall():
     check_root_or_prompt()
     clean_grub_defaults()
     clean_grub_mkconfig()
+    clean_hookcheck()
     clean_install_dir()
     update_grub_cfg()
     info(f"{THEME_NAME} succesfully uninstalled")
@@ -595,6 +606,33 @@ def do_set_icons():
     info(
         f"{GRUB_MKCONFIG_PATH} succesfully patched, icons will now persist between grub updates."
     )
+
+def install_hookcheck():
+    info(f"Create hook check script")
+    with open(HOOKCHECK_TEMPLATE_PATH, "r", newline="") as f:
+        template = f.read()
+
+    cmd_icons = " ".join(user_args.icons)
+    seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} -so -i {cmd_icons} >&2"
+
+    context = {
+        "GRUB_MKCONFIG_PATH": GRUB_MKCONFIG_PATH,
+        "THEME_NAME": THEME_NAME,
+        "THEME_OVERRIDES_TITLE": THEME_OVERRIDES_TITLE,
+        "BEGIN_THEME_OVERRIDES": BEGIN_THEME_OVERRIDES,
+        "END_THEME_OVERRIDES": END_THEME_OVERRIDES,
+        "SETICONS_CALL": seticons_call,
+    }
+
+    parsed_script = template.format(**context)
+    script_file_path = f"{GRUB_SCRIPTS_PATH}/99_matter"
+
+    with open(script_file_path, "w") as f:
+        f.write(parsed_script)
+
+    # Make it executable by user, group and others
+    st = os.stat(script_file_path)
+    os.chmod(script_file_path, st.st_mode | 0o111)
 
 
 # Script arguments
