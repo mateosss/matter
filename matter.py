@@ -26,6 +26,7 @@ THEME_DESCRIPTION = (
 def color_string(string, fg=None):
     COLORS = {  # List some colors that may be needed
         "red": "\033[31m",
+        "pink": "\033[38;5;206m",
         "green": "\033[32m",
         "orange": "\033[33m",
         "blue": "\033[34m",
@@ -35,6 +36,8 @@ def color_string(string, fg=None):
         "yellow": "\033[93m",
         "lightblue": "\033[94m",
         "lightcyan": "\033[96m",
+        "brightwhite": "\u001b[37;1m",
+        "brightmagenta": "\u001b[35;1m",
     }
     endcolor = "\033[0m"
     return f"{COLORS.get(fg, '')}{string}{endcolor}"
@@ -478,8 +481,10 @@ def get_entry_names(grub_cfg):
 
 def do_preinstall_hint():
     info(
-        f"[{color_string(THEME_NAME.upper(), fg='pink')} "
-        f"{color_string('Grub Theme'.upper(), fg='orange')}]"
+        f"{color_string('[ ', fg='brightwhite')}"
+        f"{color_string(THEME_NAME, fg='brightmagenta')} "
+        f"{color_string('Grub Theme'.upper(), fg='lightcyan')}"
+        f"{color_string(' ]', fg='brightwhite')}"
     )
     info("Argument -i required. Which icons go to which grub entries?.")
     info("Your grub entries are:")

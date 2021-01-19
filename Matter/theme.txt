@@ -11,7 +11,7 @@
 title-text: ""
 # desktop-image: "background.png"
 desktop-color: "#263238"
-terminal-font: "Unifont Regular 16"
+terminal-font: "default" # a random name to let the default font for the console
 terminal-box: "terminal_box_*.png"
 terminal-left: "0"
 terminal-top: "0"
@@ -25,9 +25,9 @@ terminal-border: "0"
   top = 29%
   width = 28%
   height = 60%
-  item_font = "GoogleSans Regular 32"
-  item_color = "#cccccc"
-  selected_item_color = "#E91E63"
+  item_font = "Google Sans Regular 32"
+  item_color = "#ffffff"
+  selected_item_color = "#e91e63"
   icon_width = 72
   icon_height = 72
   item_height = 72
@@ -43,6 +43,6 @@ terminal-border: "0"
   align = "center"
   id = "__timeout__"
   text = "Booting in %d seconds"
-  color = "#cccccc"
-  font = "GoogleSans Regular 32"
+  color = "#ffffff"
+  font = "Google Sans Regular 32"
 }

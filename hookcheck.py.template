@@ -33,16 +33,19 @@ BEGIN_THEME_OVERRIDES = "{BEGIN_THEME_OVERRIDES}"
 END_THEME_OVERRIDES = "{END_THEME_OVERRIDES}"
 SETICONS_CALL = "{SETICONS_CALL}"
 
-
+cyan = "\033[36m"
+pink = "\033[38;5;206m"
+endcolor ="\033[0m"
 def info(msg):
     # info with cyan [I]
-    print(f"\033[36m[I]\033[0m {{msg}}", file=stderr)
+    print(f"{{cyan}}[I]{{endcolor}} {{msg}}", file=stderr)
 
 
 def sh(command):
     "Executes command in shell and returns its exit status"
     return run(command, shell=True).returncode
 
+info(f"{{pink}}[Matter]{{endcolor}} Setting entry icons")
 
 with open(GRUB_MKCONFIG_PATH, "r", newline="") as f:
     grub_mkconfig = f.read()
