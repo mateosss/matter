@@ -313,11 +313,27 @@ def prepare_source_dir():
     highlight = parse_color(user_args.highlight)
     foreground = parse_color(user_args.foreground)
     background = parse_color(user_args.background)
+    image = user_args.image
     fontkey = user_args.font
     fontfile = user_args.fontfile
     fontname = user_args.fontname
     fontsize = user_args.fontsize
     icons = user_args.icons
+
+    # Image checks
+    if image:
+        if not exists(image):
+            error(
+                f"{image} does not exist!")
+        if os.path.splitext(image)[1] not in ('.png', '.tga', '.jpg', '.jpeg'):
+            error(
+                f"Background image must be one of .png, .tga, .jpg or .jpeg formats.")
+        image_name = basename(image)
+        copyfile(image, f"{INSTALLATION_SOURCE_DIR}/{image_name}")
+        if background:
+            warning(f"Both --background and --image arguments specified. Background color {background} will be ignored.")
+    else:
+        image_name = "background.png"
 
     # Icon checks
     # Read entries from grub.cfg
@@ -393,9 +409,13 @@ def prepare_source_dir():
         "highlight": highlight,
         "foreground": foreground,
         "background": background,
+        "image_name": image_name,
         "fontname": fontname,
     }
     parsed_theme = template.format(**context)
+
+    if image:
+        parsed_theme = parsed_theme.replace("# desktop-image", "desktop-image")
 
     theme_file_path = f"{INSTALLATION_SOURCE_DIR}/theme.txt"
     with open(theme_file_path, "w") as f:
@@ -712,6 +732,12 @@ def parse_args():
         type=str,
         help=f"solid background color",
         default=THEME_DEFAULT_BACKGROUND,
+    )
+    parser.add_argument(
+        "--image",
+        "-im",
+        type=str,
+        help=f"image file to use as background",
     )
     parser.add_argument(
         "--iconcolor",

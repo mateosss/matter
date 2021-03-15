@@ -9,7 +9,7 @@
 
 # Global Property
 title-text: ""
-# desktop-image: "background.png"
+# desktop-image: "{image_name}"
 desktop-color: "{background}"
 terminal-font: "default" # a random name to let the default font for the console
 terminal-box: "terminal_box_*.png"
