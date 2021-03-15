@@ -17,6 +17,7 @@ requests.
   - [Uninstall](#uninstall)
   - [Fonts](#fonts)
   - [Colors](#colors)
+  - [Images](#images)
   - [Testing Without Rebooting](#testing-without-rebooting)
 - [What does Matter do to my system
   files?](#what-does-matter-do-to-my-system-files)
@@ -152,6 +153,19 @@ the syntax:
 
 ```sh
 ./matter.py -hl FFC107 -fg white -bg 2196f3 -ic pink
+```
+
+## Images (unfinished)
+
+You can specify a background image with `--image/-im`, the supported image
+formats/extensions are PNG, JPG, JPEG, and TGA. This feature is considered
+*unfinished* because it does not yet work as well as it could *(see
+[#57](https://github.com/mateosss/matter/pull/57))*
+
+Here is an example of the syntax:
+
+```sh
+./matter.py -im ~/Pictures/some-cool-image-that-has-good-contrast-with-my-text-color.png
 ```
 
 ## Testing Without Rebooting

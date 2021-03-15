@@ -23,6 +23,7 @@ THEME_DESCRIPTION = (
 
 # Logging utils
 
+
 def color_string(string, fg=None):
     COLORS = {  # List some colors that may be needed
         "red": "\033[31m",
@@ -323,11 +324,9 @@ def prepare_source_dir():
     # Image checks
     if image:
         if not exists(image):
-            error(
-                f"{image} does not exist!")
-        if os.path.splitext(image)[1] not in ('.png', '.tga', '.jpg', '.jpeg'):
-            error(
-                f"Background image must be one of .png, .tga, .jpg or .jpeg formats.")
+            error(f"{image} does not exist")
+        if os.path.splitext(image)[1] not in (".png", ".tga", ".jpg", ".jpeg"):
+            error(f"Background image must be one of .png, .tga, .jpg or .jpeg formats.")
         image_name = basename(image)
         copyfile(image, f"{INSTALLATION_SOURCE_DIR}/{image_name}")
         if background:
@@ -632,6 +631,7 @@ def do_set_icons():
         f"{GRUB_MKCONFIG_PATH} succesfully patched, icons will now persist between grub updates."
     )
 
+
 def install_hookcheck():
     info(f"Create hook check script")
     with open(HOOKCHECK_TEMPLATE_PATH, "r", newline="") as f:
@@ -737,7 +737,7 @@ def parse_args():
         "--image",
         "-im",
         type=str,
-        help=f"image file to use as background",
+        help=f"image file to use as background, supported extensions: PNG, JPG, JPEG, TGA",
     )
     parser.add_argument(
         "--iconcolor",
