@@ -541,7 +541,7 @@ def do_install():
     do_set_icons()
     install_hookcheck()
     update_grub_cfg()
-    info(f"{THEME_NAME} succesfully installed")
+    info(f"{THEME_NAME} successfully installed")
 
 
 def do_uninstall():
