@@ -325,8 +325,8 @@ def prepare_source_dir():
     if image:
         if not exists(image):
             error(f"{image} does not exist")
-        if os.path.splitext(image)[1] not in (".png", ".tga", ".jpg", ".jpeg"):
-            error(f"Background image must be one of .png, .tga, .jpg or .jpeg formats.")
+        if os.path.splitext(image)[1] not in (".png", ".jpg", ".jpeg", ".tga"):
+            error("Background image must be one of .png, .jpg, .jpeg or .tga formats.")
         image_name = basename(image)
         copyfile(image, f"{INSTALLATION_SOURCE_DIR}/{image_name}")
         if background:
