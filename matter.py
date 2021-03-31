@@ -11,6 +11,8 @@ from os.path import dirname, basename, isdir, exists
 from subprocess import run, check_call, PIPE
 from shutil import which, rmtree, copytree, copyfile
 
+from convert import inkscape_export_svg2png
+
 # Configuration constants
 
 MIN_PYTHON_VERSION = (3, 6)  # Mainly for f-strings
@@ -248,13 +250,14 @@ def convert_icon_svg2png(icon_name):
     )
     src_path = ICON_SVG_PATHF.format(icon_name)
     dst_path = ICON_PNG_PATHF.format(icon_name)
-    command = (
-        r"convert -trim -scale 36x36 -extent 72x72 -gravity center "
-        r"-define png:color-type=6 -background none -colorspace sRGB -channel RGB "
-        rf"-threshold -1 -density 300 -fill \{color} +opaque none "
-        rf"{src_path} {dst_path}"
-    )
-    exit_code = sh(command)
+    # command = (
+        # r"convert -trim -scale 36x36 -extent 72x72 -gravity center "
+        # r"-define png:color-type=6 -background none -colorspace sRGB -channel RGB "
+        # rf"-threshold -1 -density 300 -fill \{color} +opaque none "
+        # rf"{src_path} {dst_path}"
+    # )
+    # exit_code = sh(command)
+    exit_code = inkscape_export_svg2png(color, src_path, dst_path)
     if exit_code != 0:
         error("Stop. The convert command returned an error")
 
