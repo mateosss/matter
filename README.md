@@ -17,7 +17,7 @@ requests.
   - [Uninstall](#uninstall)
   - [Fonts](#fonts)
   - [Colors](#colors)
-  - [Images](#images)
+  - [Images](#images-unfinished)
   - [Testing Without Rebooting](#testing-without-rebooting)
 - [What does Matter do to my system
   files?](#what-does-matter-do-to-my-system-files)
