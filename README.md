@@ -160,7 +160,7 @@ the syntax:
 You can specify a background image with `--image/-im`, the supported image
 formats/extensions are PNG, JPG, JPEG, and TGA. This feature is considered
 *unfinished* because it does not yet work as well as it could *(see
-[#57](https://github.com/mateosss/matter/pull/57))*
+[#58](https://github.com/mateosss/matter/issues/58))*
 
 Here is an example of the syntax:
 
