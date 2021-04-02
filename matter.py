@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+# Standard library modules
 import sys
 import os
 import re
@@ -11,7 +12,8 @@ from os.path import dirname, basename, isdir, exists
 from subprocess import run, check_call, PIPE
 from shutil import which, rmtree, copytree, copyfile
 
-from convert import inkscape_export_svg2png
+# Local Matter modules
+from convert import inkscape_convert_svg2png, magick_convert_svg2png
 
 # Configuration constants
 
@@ -236,13 +238,17 @@ def is_icon_downloaded(icon_name):
 
 
 def convert_icon_svg2png(icon_name):
-    if not has_command("convert"):
-        error(
-            "Stop. The `convert` command from imagemagick was not found",
-            "Also consider installing `inkscape` for the best results",
-        )
     if not has_command("inkscape"):
-        warning("Resulting icons could look a bit off, consider installing inkscape")
+        if not has_command("convert"):
+            error(
+                "Stop. Both `inkscape` and `convert` command from imagemagick was not found",
+                "Consider installing `inkscape` for the best results",
+                )
+        else:
+            command = "convert"
+    else:
+        command = "inkscape"
+
     color = (
         parse_color(user_args.iconcolor)
         if user_args.iconcolor
@@ -250,16 +256,16 @@ def convert_icon_svg2png(icon_name):
     )
     src_path = ICON_SVG_PATHF.format(icon_name)
     dst_path = ICON_PNG_PATHF.format(icon_name)
-    # command = (
-        # r"convert -trim -scale 36x36 -extent 72x72 -gravity center "
-        # r"-define png:color-type=6 -background none -colorspace sRGB -channel RGB "
-        # rf"-threshold -1 -density 300 -fill \{color} +opaque none "
-        # rf"{src_path} {dst_path}"
-    # )
-    # exit_code = sh(command)
-    exit_code = inkscape_export_svg2png(color, src_path, dst_path)
+
+    if command == "convert":
+        warning("Resulting icons could look a bit off, consider installing inkscape")
+        converter = magick_convert_svg2png
+    elif command == "inkscape":
+        converter = inkscape_convert_svg2png
+
+    exit_code = converter(color, src_path, dst_path)
     if exit_code != 0:
-        error("Stop. The convert command returned an error")
+        error(f"Stop. The `{command}` command returned an error")
 
 
 def get_available_fonts():
