@@ -13,7 +13,7 @@ from subprocess import run, check_call, PIPE
 from shutil import which, rmtree, copytree, copyfile
 
 # Local Matter modules
-from convert import inkscape_convert_svg2png, magick_convert_svg2png
+from svg2png import inkscape_convert_svg2png, magick_convert_svg2png
 
 # Configuration constants
 
