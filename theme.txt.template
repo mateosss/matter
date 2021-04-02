@@ -2,7 +2,7 @@
 # already parsed and the comments below could not make too much sense.
 
 # theme.txt.template represents a python string that gets format()-ed
-# Note: for scaping literal curly braces, double them like so: {{ or }}
+# Note: for escaping literal curly braces, double them like so: {{ or }}
 
 # {theme_name} Theme File
 # Designed for any resolution

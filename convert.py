@@ -44,7 +44,7 @@ def inkscape_convert_svg2png(color, src_path, dst_path):
     width, height = int_ignore_units(root.attrib['width']), int_ignore_units(root.attrib['height'])
     width_gap, height_gap = (1-FRAC)*width/2, (1-FRAC)*height/2
 
-    # Group all elements that are child of <svg> while changing their 'style' attributes
+    # Group all elements that are children of <svg> while changing their 'style' attributes
     elements = root.findall('svg:*', namespaces={'svg': SVG_URI})
     group = ET.SubElement(root, 'g')
     for element in elements:

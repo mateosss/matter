@@ -560,7 +560,7 @@ def do_uninstall():
     clean_hookcheck()
     clean_install_dir()
     update_grub_cfg()
-    info(f"{THEME_NAME} succesfully uninstalled")
+    info(f"{THEME_NAME} successfully uninstalled")
 
 
 def do_list_grub_cfg_entries():
@@ -614,7 +614,7 @@ def do_patch_grub_cfg_icons():
     with open(GRUB_CFG_PATH, "w") as f:
         f.write(new_grub_cfg)
 
-    info(f"{len(icons)} icons succesfully patched onto {GRUB_CFG_PATH}")
+    info(f"{len(icons)} icons successfully patched onto {GRUB_CFG_PATH}")
 
 
 def do_set_icons():
@@ -637,7 +637,7 @@ def do_set_icons():
         f.write(new_grub_mkconfig)
 
     info(
-        f"{GRUB_MKCONFIG_PATH} succesfully patched, icons will now persist between grub updates."
+        f"{GRUB_MKCONFIG_PATH} successfully patched, icons will now persist between grub updates."
     )
 
 
