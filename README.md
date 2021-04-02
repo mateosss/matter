@@ -23,7 +23,7 @@ requests.
   files?](#what-does-matter-do-to-my-system-files)
 - [Gallery](#gallery): [1](#example-1), [2](#example-2), [3](#example-3),
   [4](#example-4), [5](#example-5), [6](#example-6), [7](#example-7),
-  [8](#example-8), [9](#example-9), [10](#example-10)
+  [8](#example-8), [9](#example-9), [10](#example-10), [11](#example-11)
 - [Contributing](#contributing)
 - [Thanks](#thanks)
 
@@ -347,6 +347,15 @@ and [Russo One Regular 400](https://fonts.google.com/specimen/Russo+One)*
 -ff ~/fonts/Cinzel/Cinzel-Regular.ttf \
 -fn Cinzel Regular -fs 40
 # -hl c28f2c -bg 1a1d21 -fg c9a45b \
+```
+
+## Example 11
+
+![Example 11](.docs/gallery11.png)
+
+```sh
+./matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog \
+-im ~/images/material-background.png
 ```
 
 # Contributing
