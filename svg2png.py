@@ -69,7 +69,7 @@ def inkscape_convert_svg2png(color, src_path, dst_path):
 
     # Check inkscape version
     version_string = subprocess.run('inkscape --version 2>/dev/null',
-            shell=True, capture_output=True).stdout.decode()
+            shell=True, stdout=subprocess.PIPE).stdout.decode()
     version = re.findall(r'(?<=Inkscape )[.\d]+', version_string)[0]
     if version[0] == '1':
         arguments = [f'--export-filename={dst_path}']
