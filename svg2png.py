@@ -10,20 +10,24 @@ import xml.dom.minidom
 # Utils copied from matter.py
 # TODO: matter.py needs a split up for proper reuse
 
+
 def sh(command):
     "Executes command in shell and returns its exit status"
     return run(command, shell=True).returncode
+
 
 def shout(command):
     "Executes command in shell and returns its stdout"
     stdout = run(command, shell=True, stdout=PIPE).stdout.decode("utf-8")
     return stdout
 
+
 def error(*lines, should_exit=True):
     for line in lines:
         print(f"\033[91m[E]\033[0m {line}")
     if should_exit:
         exit(1)
+
 
 def inkscape_convert_svg2png(color, src_path, dst_path):
     SVG_URI = "http://www.w3.org/2000/svg"
@@ -76,14 +80,12 @@ def inkscape_convert_svg2png(color, src_path, dst_path):
     elements = root.findall("svg:*", namespaces={"svg": SVG_URI})
     group = ET.SubElement(root, "g")
     for element in elements:
-        if any(
-            map(element.tag.endswith, ["defs", "metadata"])
-        ):  # Don't group these special tags
+        # Don't group these special tags
+        if any(map(element.tag.endswith, ["defs", "metadata"])):
             continue
         root.remove(element)
-        for (
-            child
-        ) in element.iter():  # Changes all decendents (.iter will also include itself)
+        # Changes all decendents (.iter will also include itself)
+        for child in element.iter():
             if "style" in child.attrib:
                 child.attrib["style"] = re.sub(
                     r"(?<=fill:)\S+?(?=;)", color, child.attrib["style"]
