@@ -2,6 +2,7 @@
 
 import os
 import re
+import subprocess
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 
@@ -65,8 +66,26 @@ def inkscape_convert_svg2png(color, src_path, dst_path):
     with open(TEMPFILE, 'w') as f:
         f.write(xml_string)
 
-    cmd = f"inkscape --export-filename='{dst_path}' {TEMPFILE} -w 72 2>/dev/null"
-    exit_code = os.system(cmd)
+
+    # Check inkscape version
+    version_string = subprocess.run('inkscape --version 2>/dev/null',
+            shell=True, capture_output=True).stdout.decode()
+    version = re.findall(r'(?<=Inkscape )[.\d]+', version_string)[0]
+    if version[0] == '1':
+        arguments = [f'--export-filename={dst_path}']
+    elif version[0] == '0':
+        arguments = ['--without-gui', f'--export-png={dst_path}']
+    arguments.extend([TEMPFILE, '-w', '72'])
+
+    inkscape_proc = subprocess.Popen(['inkscape', *arguments],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    subprocess.run(['sed', 's/^/inkscape: /'], stdin=inkscape_proc.stdout)
+    inkscape_proc.wait()
+    exit_code = inkscape_proc.returncode
+    # Alternative - Using bash to pipe
+    # cmd = f"""/bin/bash -c 'inkscape {' '.join(arguments)} 2>&1 | sed "s/^/inkscape: /"; exit ${{PIPESTATUS[0]}}'"""
+    # exit_code = os.system(cmd)
+
     os.remove(TEMPFILE)
     return exit_code
 
