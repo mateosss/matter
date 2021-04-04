@@ -243,7 +243,7 @@ def convert_icon_svg2png(icon_name):
             error(
                 "Stop. Both `inkscape` and `convert` command from imagemagick was not found",
                 "Consider installing `inkscape` for the best results",
-                )
+            )
         else:
             command = "convert"
     else:
@@ -322,7 +322,11 @@ def prepare_source_dir():
     # Get user color preferences
     highlight = parse_color(user_args.highlight)
     foreground = parse_color(user_args.foreground)
-    background = parse_color(THEME_DEFAULT_BACKGROUND if user_args.background is None else user_args.background)
+    background = parse_color(
+        THEME_DEFAULT_BACKGROUND
+        if user_args.background is None
+        else user_args.background
+    )
     image = user_args.image
     fontkey = user_args.font
     fontfile = user_args.fontfile
@@ -339,7 +343,9 @@ def prepare_source_dir():
         image_name = basename(image)
         copyfile(image, f"{INSTALLATION_SOURCE_DIR}/{image_name}")
         if user_args.background:
-            warning(f"Both --background and --image arguments specified. Background color {background} will be ignored.")
+            warning(
+                f"Both --background and --image arguments specified. Background color {background} will be ignored."
+            )
     else:
         image_name = "background.png"
 
@@ -442,9 +448,13 @@ def copy_source_to_target():
 
 def update_grub_cfg():
     info("Update grub.cfg")
-    update_command = which("update-grub") or which("grub-mkconfig") or which("grub2-mkconfig")
+    update_command = (
+        which("update-grub") or which("grub-mkconfig") or which("grub2-mkconfig")
+    )
     if update_command is None:
-        error(f"Command for generating grub.cfg not found (tried update-grub, grub-mkconfig and grub2-mkconfig)")
+        error(
+            f"Command for generating grub.cfg not found (tried update-grub, grub-mkconfig and grub2-mkconfig)"
+        )
     command = f"{update_command} -o {GRUB_CFG_PATH}"
     info(f"Remake grub.cfg with {command}")
     sh(command)
