@@ -261,7 +261,9 @@ def convert_icon_svg2png(icon_name):
         warning("Resulting icons could look a bit off, consider installing inkscape")
         converter = magick_convert_svg2png
     elif command == "inkscape":
-        converter = inkscape_convert_svg2png
+        # TODO: Fix inkscape_convert_svg2png producing incorrect PNGs and use it instead
+        # converter = inkscape_convert_svg2png
+        converter = magick_convert_svg2png
 
     exit_code = converter(color, src_path, dst_path)
     if exit_code != 0:
