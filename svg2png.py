@@ -3,9 +3,27 @@
 import os
 import re
 import subprocess
+from subprocess import run, PIPE
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 
+# Utils copied from matter.py
+# TODO: matter.py needs a split up for proper reuse
+
+def sh(command):
+    "Executes command in shell and returns its exit status"
+    return run(command, shell=True).returncode
+
+def shout(command):
+    "Executes command in shell and returns its stdout"
+    stdout = run(command, shell=True, stdout=PIPE).stdout.decode("utf-8")
+    return stdout
+
+def error(*lines, should_exit=True):
+    for line in lines:
+        print(f"\033[91m[E]\033[0m {line}")
+    if should_exit:
+        exit(1)
 
 def inkscape_convert_svg2png(color, src_path, dst_path):
     SVG_URI = "http://www.w3.org/2000/svg"
@@ -82,25 +100,17 @@ def inkscape_convert_svg2png(color, src_path, dst_path):
         f.write(xml_string)
 
     # Check inkscape version
-    version_string = subprocess.run(
-        "inkscape --version 2>/dev/null", shell=True, stdout=subprocess.PIPE
-    ).stdout.decode()
-    version = re.findall(r"(?<=Inkscape )[.\d]+", version_string)[0]
-    if version[0] == "1":
-        arguments = [f"--export-filename={dst_path}"]
-    elif version[0] == "0":
-        arguments = ["--without-gui", f"--export-png={dst_path}"]
-    arguments.extend([TEMPFILE, "-w", "72"])
-
-    inkscape_proc = subprocess.Popen(
-        ["inkscape", *arguments], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
-    )
-    subprocess.run(["sed", "s/^/inkscape: /"], stdin=inkscape_proc.stdout)
-    inkscape_proc.wait()
-    exit_code = inkscape_proc.returncode
-    # Alternative - Using bash to pipe
-    # cmd = f"""/bin/bash -c 'inkscape {' '.join(arguments)} 2>&1 | sed "s/^/inkscape: /"; exit ${{PIPESTATUS[0]}}'"""
-    # exit_code = os.system(cmd)
+    version_string = shout("inkscape --version 2>/dev/null")
+    inkscape_major = re.search(r"(\d+)\.\d+\.\d+", version_string).group(1)
+    command = "inkscape "
+    if inkscape_major == "1":
+        command += f"--export-filename={dst_path} "
+    elif inkscape_major == "0":
+        command += f"--without-gui --export-png={dst_path} "
+    else:
+        error("Unsupported inkscape version")
+    command += f"-w 72 {TEMPFILE} 1>/dev/null"
+    exit_code = sh(command)
 
     os.remove(TEMPFILE)
     return exit_code
