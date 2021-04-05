@@ -11,7 +11,7 @@
 title-text: ""
 # desktop-image: "{image_name}"
 desktop-color: "{background}"
-terminal-font: "default" # a random name to let the default font for the console
+terminal-font: "Unifont Regular 16" # A smaller font for the console
 terminal-box: "terminal_box_*.png"
 terminal-left: "0"
 terminal-top: "0"
