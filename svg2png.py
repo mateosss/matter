@@ -31,7 +31,7 @@ def error(*lines, should_exit=True):
 
 def inkscape_convert_svg2png(color, src_path, dst_path):
     SVG_URI = "http://www.w3.org/2000/svg"
-    FRAC = 0.7
+    FRAC = 0.6
     TEMPFILE = "temp.svg"
 
     def parse_with_map(source):
@@ -77,7 +77,7 @@ def inkscape_convert_svg2png(color, src_path, dst_path):
     width_gap, height_gap = (1 - FRAC) * width / 2, (1 - FRAC) * height / 2
 
     # Group all elements that are children of <svg> while changing their 'style' attributes
-    elements = root.findall("svg:*", namespaces={"svg": SVG_URI})
+    elements = list(root)
     group = ET.SubElement(root, "g")
     for element in elements:
         # Don't group these special tags
