@@ -13,6 +13,7 @@ from subprocess import run, check_call, PIPE
 from shutil import which, rmtree, copytree, copyfile
 
 # Local Matter modules
+from utils import *
 from svg2png import inkscape_convert_svg2png, magick_convert_svg2png
 
 # Configuration constants
@@ -25,44 +26,6 @@ THEME_DESCRIPTION = (
     "Run this script without arguments for next steps on installing Matter."
 )
 
-# Logging utils
-
-
-def color_string(string, fg=None):
-    COLORS = {  # List some colors that may be needed
-        "red": "\033[31m",
-        "pink": "\033[38;5;206m",
-        "green": "\033[32m",
-        "orange": "\033[33m",
-        "blue": "\033[34m",
-        "cyan": "\033[36m",
-        "lightred": "\033[91m",
-        "lightgreen": "\033[92m",
-        "yellow": "\033[93m",
-        "lightblue": "\033[94m",
-        "lightcyan": "\033[96m",
-        "brightwhite": "\u001b[37;1m",
-        "brightmagenta": "\u001b[35;1m",
-    }
-    endcolor = "\033[0m"
-    return f"{COLORS.get(fg, '')}{string}{endcolor}"
-
-
-def info(*lines):
-    for line in lines:
-        print(f"{color_string('[I] ', fg='cyan')}{line}")
-
-
-def error(*lines, should_exit=True):
-    for line in lines:
-        print(f"{color_string('[E] ', fg='lightred')}{line}")
-    if should_exit:
-        exit(1)
-
-
-def warning(*lines):
-    for line in lines:
-        print(f"{color_string('[W] ', fg='yellow')}{line}")
 
 
 if exists("/boot/grub"):
@@ -138,23 +101,6 @@ MDI_CDN = "https://raw.githubusercontent.com/Templarian/MaterialDesign-SVG/maste
 user_args: argparse.Namespace
 
 # Utils
-
-
-def sh(command):
-    "Executes command in shell and returns its exit status"
-    return run(command, shell=True).returncode
-
-
-def shout(command):
-    "Executes command in shell and returns its stdout"
-    stdout = run(command, shell=True, stdout=PIPE).stdout.decode("utf-8")
-    print(stdout)
-    return stdout
-
-
-def has_command(command):
-    return which(command) is not None
-
 
 def check_python_version():
     installed = (sys.version_info.major, sys.version_info.minor)

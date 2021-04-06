@@ -2,31 +2,11 @@
 
 import os
 import re
-import subprocess
-from subprocess import run, PIPE
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 
-# Utils copied from matter.py
-# TODO: matter.py needs a split up for proper reuse
-
-
-def sh(command):
-    "Executes command in shell and returns its exit status"
-    return run(command, shell=True).returncode
-
-
-def shout(command):
-    "Executes command in shell and returns its stdout"
-    stdout = run(command, shell=True, stdout=PIPE).stdout.decode("utf-8")
-    return stdout
-
-
-def error(*lines, should_exit=True):
-    for line in lines:
-        print(f"\033[91m[E]\033[0m {line}")
-    if should_exit:
-        exit(1)
+# Local Matter modules
+from utils import sh, shout, error
 
 
 def inkscape_convert_svg2png(color, src_path, dst_path):
