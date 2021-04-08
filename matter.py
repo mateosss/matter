@@ -743,23 +743,27 @@ def parse_args():
 
 
 if __name__ == "__main__":
-    check_python_version()
-    user_args = parse_args()
+    try:
+        check_python_version()
+        user_args = parse_args()
 
-    if user_args.listentries:
-        do_list_grub_cfg_entries()
-    elif user_args.buildonly:
-        prepare_source_dir()
-    elif user_args.seticons_once:
-        do_patch_grub_cfg_icons()
-    elif user_args.seticons:
-        do_set_icons()
-    elif user_args.uninstall:
-        do_uninstall()
-    elif user_args.icons is None:
-        do_preinstall_hint()
-    else:
-        do_install()
+        if user_args.listentries:
+            do_list_grub_cfg_entries()
+        elif user_args.buildonly:
+            prepare_source_dir()
+        elif user_args.seticons_once:
+            do_patch_grub_cfg_icons()
+        elif user_args.seticons:
+            do_set_icons()
+        elif user_args.uninstall:
+            do_uninstall()
+        elif user_args.icons is None:
+            do_preinstall_hint()
+        else:
+            do_install()
 
-    if user_args.test:
-        do_test()
+        if user_args.test:
+                do_test()
+    except KeyboardInterrupt:
+        error("Halted by user")
+        sys.exit(1)
