@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from subprocess import run, PIPE
+from shutil import which
 
 # Logging utils
 
@@ -48,10 +49,11 @@ def sh(command):
     return run(command, shell=True).returncode
 
 
-def shout(command):
+def shout(command, silence=False):
     "Executes command in shell and returns its stdout"
     stdout = run(command, shell=True, stdout=PIPE).stdout.decode("utf-8")
-    print(stdout)
+    if not silence:
+        print(stdout)
     return stdout
 
 

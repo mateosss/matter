@@ -183,7 +183,7 @@ def is_icon_downloaded(icon_name):
     return exists(svg_path)
 
 
-def convert_icon_svg2png(icon_name):
+def convert_icon_svg2png(icon_name, whisper=False):
     if not has_command("inkscape"):
         if not has_command("convert"):
             error(
@@ -209,7 +209,7 @@ def convert_icon_svg2png(icon_name):
     elif command == "inkscape":
         converter = inkscape_convert_svg2png
 
-    exit_code = converter(color, src_path, dst_path)
+    exit_code = converter(color, src_path, dst_path, whisper=whisper)
     if exit_code != 0:
         error(f"Stop. The `{command}` command returned an error")
 
@@ -342,9 +342,12 @@ def prepare_source_dir():
 
     # Convert icons
     info("Convert icons")
-    for icon in icons:
+    for i, icon in enumerate(icons):
         if icon != "_":
-            convert_icon_svg2png(icon)
+            if i == 0:
+                convert_icon_svg2png(icon)
+            else:
+                convert_icon_svg2png(icon, whisper=True)
 
     # Prepare Font
 

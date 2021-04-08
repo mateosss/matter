@@ -9,8 +9,8 @@ import xml.dom.minidom
 from utils import sh, shout, error
 
 
-def inkscape_convert_svg2png(color, src_path, dst_path):
-    SVG_URI = "http://www.w3.org/2000/svg"
+def inkscape_convert_svg2png(color, src_path, dst_path, whisper=False):
+    # SVG_URI = "http://www.w3.org/2000/svg"
     FRAC = 0.6
     TEMPFILE = "temp.svg"
 
@@ -82,7 +82,7 @@ def inkscape_convert_svg2png(color, src_path, dst_path):
         f.write(xml_string)
 
     # Check inkscape version
-    version_string = shout("inkscape --version 2>/dev/null")
+    version_string = shout("inkscape --version 2>/dev/null", silence=True)
     inkscape_major = re.search(r"(\d+)\.\d+\.\d+", version_string).group(1)
     command = "inkscape "
     if inkscape_major == "1":
@@ -91,14 +91,16 @@ def inkscape_convert_svg2png(color, src_path, dst_path):
         command += f"--without-gui --export-png={dst_path} "
     else:
         error("Unsupported inkscape version")
-    command += f"-w 72 {TEMPFILE} 1>/dev/null"
+    command += f"-w 72 {TEMPFILE}"
+    if whisper:
+        command += " 2>&1 | tail -1"
     exit_code = sh(command)
 
     os.remove(TEMPFILE)
     return exit_code
 
 
-def magick_convert_svg2png(color, src_path, dst_path):
+def magick_convert_svg2png(color, src_path, dst_path, whisper=None):
     cmd = (
         r"convert -trim -scale 36x36 -extent 72x72 -gravity center "
         r"-define png:color-type=6 -background none -colorspace sRGB -channel RGB "
