@@ -2,35 +2,15 @@
 
 import os
 import re
-import subprocess
-from subprocess import run, PIPE
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
 
-# Utils copied from matter.py
-# TODO: matter.py needs a split up for proper reuse
+# Local Matter modules
+from utils import sh, shout, error
 
 
-def sh(command):
-    "Executes command in shell and returns its exit status"
-    return run(command, shell=True).returncode
-
-
-def shout(command):
-    "Executes command in shell and returns its stdout"
-    stdout = run(command, shell=True, stdout=PIPE).stdout.decode("utf-8")
-    return stdout
-
-
-def error(*lines, should_exit=True):
-    for line in lines:
-        print(f"\033[91m[E]\033[0m {line}")
-    if should_exit:
-        exit(1)
-
-
-def inkscape_convert_svg2png(color, src_path, dst_path):
-    SVG_URI = "http://www.w3.org/2000/svg"
+def inkscape_convert_svg2png(color, src_path, dst_path, whisper=False):
+    # SVG_URI = "http://www.w3.org/2000/svg"
     FRAC = 0.6
     TEMPFILE = "temp.svg"
 
@@ -102,7 +82,7 @@ def inkscape_convert_svg2png(color, src_path, dst_path):
         f.write(xml_string)
 
     # Check inkscape version
-    version_string = shout("inkscape --version 2>/dev/null")
+    version_string = shout("inkscape --version 2>/dev/null", silence=whisper)
     inkscape_major = re.search(r"(\d+)\.\d+\.\d+", version_string).group(1)
     command = "inkscape "
     if inkscape_major == "1":
@@ -111,14 +91,16 @@ def inkscape_convert_svg2png(color, src_path, dst_path):
         command += f"--without-gui --export-png={dst_path} "
     else:
         error("Unsupported inkscape version")
-    command += f"-w 72 {TEMPFILE} 1>/dev/null"
+    command += f"-w 72 {TEMPFILE}"
+    if whisper:
+        command += " 2>&1 | tail -1"
     exit_code = sh(command)
 
     os.remove(TEMPFILE)
     return exit_code
 
 
-def magick_convert_svg2png(color, src_path, dst_path):
+def magick_convert_svg2png(color, src_path, dst_path, whisper=None):
     cmd = (
         r"convert -trim -scale 36x36 -extent 72x72 -gravity center "
         r"-define png:color-type=6 -background none -colorspace sRGB -channel RGB "

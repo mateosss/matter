@@ -67,7 +67,7 @@ with open(GRUB_MKCONFIG_PATH, "w") as f:
     f.write(grub_mkconfig)
 
 info(
-    f"{{GRUB_MKCONFIG_PATH}} succesfully patched, icons will now persist between grub updates."
+    f"{{GRUB_MKCONFIG_PATH}} successfully patched, icons will now persist between grub updates."
 )
 
 
