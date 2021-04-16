@@ -1,7 +1,4 @@
 #!/usr/bin/python3
-# vimF2 w | call Exec('./matter.py -i _ _ _ _ _ _ _ _ _ _ _ _')
-# vimF3 w | !rsync -a -delete -e 'ssh -p 5679' . heyzec@localhost:matter/ && ssh -t heyzec@localhost -p 5679 'tmux send-keys -t ssh "cd ~/matter; vim matter.py" Enter && tmux a || bash'
-# vimF4 e | !~/matter/matter.py -i ubuntu microsoft-windows folder _ _ _ _ _ _ cog ; bash
 
 # Standard library modules
 import sys
@@ -13,7 +10,6 @@ import urllib.request as request
 from urllib.error import HTTPError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from os.path import dirname, basename, isdir, exists
-from subprocess import run, check_call, PIPE
 from shutil import which, rmtree, copytree, copyfile
 
 # Local Matter modules
@@ -511,7 +507,7 @@ def do_install():
     prepare_target_dir()
     copy_source_to_target()
     update_grub_defaults()
-    do_set_icons()
+    do_set_icons(patch_grubcfg=True)
     install_hookcheck()
     update_grub_cfg()
     info(f"{THEME_NAME} successfully installed")
@@ -547,6 +543,8 @@ def create_config_file():
     entries_to_icons = {}
     for icon, entry in zip(icons, entries):
         entryname = entry.group("entryname")
+        if entryname in entries_to_icons:
+            warning(f"Duplicate entry '{entryname}'. Unexpected behaviour may occur. Consider changing names using Grub Customizer.")
         entries_to_icons[entryname]  = icon
 
     config = {"icons": entries_to_icons}
@@ -567,43 +565,25 @@ def patch_from_config_file():
     icons = []
     for entry in current_entries:
         entryname = entry.group("entryname")
-        icons.append(entries_to_icons.get(entryname, "_"))
+        if entryname in entries_to_icons:
+            icons.append(entries_to_icons[entryname])
+        else:
+            warning(
+                    f"{entryname} is a new grub menu entry, no icon will be set for it. "
+                    f"Rerun matter.py to set icons"
+                )
+            icons.append("_")
 
     do_patch_grub_cfg_icons(icons)
 
 
-def check_icons_valid():
-    icons = user_args.icons
-    if icons is None:
-        error("Stop. Unspecified icons (--icons/-i argument)")
-    icons = [check_icon_converted(i) for i in icons]
-
-    # Read current grub cfg
-    entries = get_entry_names()
-    if len(icons) != len(entries):
-        error(
-            f"You must specify {len(entries)} "
-            f"icons ({len(icons)} provided) for entries:",
-            should_exit=False,
-        )
-        for i, m in enumerate(entries):
-            print(f"{i + 1}. {m['entryname']}")
-        # NOTE: We exit with 0 here to not stop the apt upgrade process
-        # eventually it will be solved with an autoremove
-        exit(0)
-
-
-def do_patch_grub_cfg_icons(icons=None):
-    if icons is None:
-        icons = argparse.icons
+def do_patch_grub_cfg_icons(icons):
 
     info(f"Begin {GRUB_CFG_PATH} patch")
     with open(GRUB_CFG_PATH, "r", newline="") as f:
         grub_cfg = f.read()
     # Read current grub cfg
     entries = get_entry_names()
-
-    assert len(icons) == len(entries)
 
     # Build new grub cfg with given icons
     new_grub_cfg = ""
@@ -624,31 +604,52 @@ def do_patch_grub_cfg_icons(icons=None):
     info(f"{len(icons)} icons successfully patched onto {GRUB_CFG_PATH}")
 
 
-def do_set_icons():
-    create_config_file()
-    # Patch grub.cfg
-    check_icons_valid()
+def do_set_icons(patch_grubcfg):
+
+    icons = user_args.icons
+
+    if icons is None:
+        error("Stop. Unspecified icons (--icons/-i argument)")
+    icons = [check_icon_converted(i) for i in icons]
+
+    # Read current grub cfg
+    entries = get_entry_names()
+    if len(icons) != len(entries):
+        error(
+            f"You must specify {len(entries)} "
+            f"icons ({len(icons)} provided) for entries:",
+            should_exit=False,
+        )
+        for i, m in enumerate(entries):
+            print(f"{i + 1}. {m['entryname']}")
+        # NOTE: We exit with 0 here to not stop the apt upgrade process
+        # eventually it will be solved with an autoremove
+        exit(0)
+
     do_patch_grub_cfg_icons(user_args.icons)
 
-    # Patch grub-mkconfig so everytime it executes, it patches grub.cfg
-    info(f"Begin {GRUB_MKCONFIG_PATH} patch")
-    info(f"Clean old {GRUB_MKCONFIG_PATH} patch if any")
+    if patch_grubcfg:
+        create_config_file()
 
-    cmd_icons = " ".join(user_args.icons)
-    # seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} -so -i {cmd_icons} >&2"
-    seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} --relaxicons"
-    new_grub_mkconfig = read_cleaned_grub_mkconfig()
-    new_grub_mkconfig += (
-        f"\n\n{BEGIN_THEME_OVERRIDES}\n{seticons_call}\n{END_THEME_OVERRIDES}\n\n"
-    )
+        # Patch grub-mkconfig so everytime it executes, it patches grub.cfg
+        info(f"Begin {GRUB_MKCONFIG_PATH} patch")
+        info(f"Clean old {GRUB_MKCONFIG_PATH} patch if any")
 
-    check_root_or_prompt()
-    with open(GRUB_MKCONFIG_PATH, "w") as f:
-        f.write(new_grub_mkconfig)
+        # cmd_icons = " ".join(user_args.icons)
+        # seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} -so -i {cmd_icons} >&2"
+        seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} --configicons >&2"
+        new_grub_mkconfig = read_cleaned_grub_mkconfig()
+        new_grub_mkconfig += (
+            f"\n\n{BEGIN_THEME_OVERRIDES}\n{seticons_call}\n{END_THEME_OVERRIDES}\n\n"
+        )
 
-    info(
-        f"{GRUB_MKCONFIG_PATH} successfully patched, icons will now persist between grub updates."
-    )
+        check_root_or_prompt()
+        with open(GRUB_MKCONFIG_PATH, "w") as f:
+            f.write(new_grub_mkconfig)
+
+        info(
+            f"{GRUB_MKCONFIG_PATH} successfully patched, icons will now persist between grub updates."
+        )
 
 
 def install_hookcheck():
@@ -657,7 +658,8 @@ def install_hookcheck():
         template = f.read()
 
     cmd_icons = " ".join(user_args.icons)
-    seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} -so -i {cmd_icons} >&2"
+    # seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} -so -i {cmd_icons} >&2"
+    seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} --configicons"
 
     context = {
         "GRUB_MKCONFIG_PATH": GRUB_MKCONFIG_PATH,
@@ -791,10 +793,10 @@ def parse_args():
         default=THEME_DEFAULT_FONT_SIZE,
     )
     parser.add_argument(
-        "--relaxicons",
-        "-ri",
+        "--configicons",
+        "-ci",
         action="store_true",
-        help="set grub entries icons using config file"
+        help="set grub entries icons using config file. "
     )
     return parser.parse_args()
 
@@ -809,12 +811,12 @@ if __name__ == "__main__":
         elif user_args.buildonly:
             prepare_source_dir()
         elif user_args.seticons_once:
-            do_patch_grub_cfg_icons()
+            do_set_icons(patch_grubcfg=False)
         elif user_args.seticons:
-            do_set_icons()
+            do_set_icons(patch_grubcfg=True)
         elif user_args.uninstall:
             do_uninstall()
-        elif user_args.relaxicons:
+        elif user_args.configicons:
             patch_from_config_file()
         elif user_args.icons is None:
             do_preinstall_hint()
