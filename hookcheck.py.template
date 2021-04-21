@@ -5,7 +5,7 @@ This template file goes into /etc/grub.d/99_matter
 It checks that the theme is still hooked to grub-mkconfig.
 Hooks it back again if not.
 
-This is a template file, be careful of your use of curly braces Use {{ and }} instead.
+This is a template file, be careful of your use of curly braces. Use {{ and }} instead.
 
 # About /etc/grub.d
 Files in /etc/grub.d run in the order of their prefix number.
