@@ -4,7 +4,7 @@ Minimalist grub theme originally inspired by material design 2.
 
 ![Matter Gif](.docs/matter.gif)
 
-Feel free open issues for any problem or request you have and/or submit pull
+Feel free to open issues for any problem or request you have and/or submit pull
 requests.
 
 # Index
@@ -31,9 +31,9 @@ requests.
 
 [Click here to download Matter](https://github.com/mateosss/matter/releases/latest/download/matter.zip)
 
-It is **strongly adviced** to put the downloaded files in some folder that will
+It is **strongly advised** to put the downloaded files in some folder that will
 not get deleted, as the main script `matter.py` is needed for future grub
-updates made by your system. Also if you wan't to uninstall matter you could do
+updates made by your system. Also if you want to uninstall matter you could do
 it from there as well.
 
 ## Dependencies
