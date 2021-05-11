@@ -7,7 +7,7 @@ import re
 import json
 import argparse
 import urllib.request as request
-from urllib.error import HTTPError
+from urllib.error import HTTPError, URLError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from os.path import dirname, basename, isdir, exists
 from shutil import which, rmtree, copytree, copyfile
@@ -164,8 +164,10 @@ def download_icon(icon_name):
     try:
         with request.urlopen(url) as f:
             response = f.read()
-    except HTTPError as err:
+    except HTTPError as err:  # A subclass of URLError
         error(f"Couldn't get icon {icon_name} ({err.reason})", f"At URL {err.geturl()}")
+    except URLError as err:
+        error(f"Couldn't get icon {icon_name} ({err.reason})")
     svg_path = ICON_SVG_PATHF.format(icon_name)
     with open(svg_path, "wb") as f:
         f.write(response)
@@ -529,7 +531,7 @@ def do_list_grub_cfg_entries():
     with open(GRUB_CFG_PATH, "r", newline="") as f:
         grub_cfg = f.read()
 
-    entries = get_entry_names(grub_cfg)
+    entries = get_entry_names()
 
     for i, m in enumerate(entries):
         print(f"{i + 1}. {m['entryname']}")
