@@ -641,8 +641,16 @@ def do_set_icons(patch_grubcfg):
         # seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} -so -i {cmd_icons} >&2"
         seticons_call = f"{INSTALLER_DIR}/{INSTALLER_NAME} --configicons >&2"
         new_grub_mkconfig = read_cleaned_grub_mkconfig()
+
+        # grub-mkconfig is called on upgrade, and on failure it halts.
+        # A failure on our part should not halt an upgrade, let's temporarily
+        # disable the stop-on-error functionality with set +e. See #67
         new_grub_mkconfig += (
-            f"\n\n{BEGIN_THEME_OVERRIDES}\n{seticons_call}\n{END_THEME_OVERRIDES}\n\n"
+            f"\n\n{BEGIN_THEME_OVERRIDES}\n"
+            f"set +e\n"
+            f"{seticons_call}\n"
+            f"set -e\n"
+            f"{END_THEME_OVERRIDES}\n\n"
         )
 
         check_root_or_prompt()
