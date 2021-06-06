@@ -4,7 +4,7 @@ Minimalist grub theme originally inspired by material design 2.
 
 ![Matter Gif](.docs/matter.gif)
 
-Feel free open issues for any problem or request you have and/or submit pull
+Feel free to open issues for any problem or request you have and/or submit pull
 requests.
 
 # Index
@@ -31,9 +31,9 @@ requests.
 
 [Click here to download Matter](https://github.com/mateosss/matter/releases/latest/download/matter.zip)
 
-It is **strongly adviced** to put the downloaded files in some folder that will
+It is **strongly advised** to put the downloaded files in some folder that will
 not get deleted, as the main script `matter.py` is needed for future grub
-updates made by your system. Also if you wan't to uninstall matter you could do
+updates made by your system. Also if you want to uninstall matter you could do
 it from there as well.
 
 ## Dependencies
@@ -42,7 +42,7 @@ Matter will inform you of any missing dependencies, but here is a list anyways:
 
 - `inkscape` (**Main dependency**): This brings the `convert` command from
   `imagemagick` with best svg to png conversion.
-- `grub-mkconfig` and `grub-mkfont`: General grub utilities needed, if you
+- `grub-mkconfig` and `grub-mkfont`: General grub utilities needed. If you
   don't have these, please create an issue with more information about your
   system as I've only worked with ones that have these commands.
 - [`grub2-theme-preview`](https://github.com/hartwork/grub2-theme-preview)
@@ -73,7 +73,7 @@ or if you want to help out with fedora support*
 </details>
 
 Following is a Matter installation with default values. Don't worry, it is very
-easy to rollback or overwrite this installation later if you wan't to.
+easy to rollback or overwrite this installation later if you want to.
 
 The script that does all the work is `matter.py`, so let's start by running it
 
@@ -97,10 +97,10 @@ this one:
 ```
 
 Now you should pick some icons from <https://materialdesignicons.com> for each entry
-listed, (you only need the icon's name, use the search panel and hover over any
-icon you like to see its name). In these example I will pick `ubuntu` for entry
+listed (you only need the icon's name, use the search panel and hover over any
+icon you like to see its name). For this example I will pick `ubuntu` for entry
 1, `microsoft-windows` for 2, `folder` for 3 (as it is a submenu in my
-particular case), and `cog` for 8, I don't care about all the remaining entries
+particular case), and `cog` for 8. I don't care about all the remaining entries
 so I will just use "`_`" (underscore) for those.
 
 ```sh

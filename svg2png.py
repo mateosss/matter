@@ -83,7 +83,7 @@ def inkscape_convert_svg2png(color, src_path, dst_path, whisper=False):
 
     # Check inkscape version
     version_string = shout("inkscape --version 2>/dev/null", silence=whisper)
-    inkscape_major = re.search(r"(\d+)\.\d+\.\d+", version_string).group(1)
+    inkscape_major = re.search(r"(\d+)\.\d+(\.\d+)?", version_string).group(1)
     command = "inkscape "
     if inkscape_major == "1":
         command += f"--export-filename={dst_path} "
