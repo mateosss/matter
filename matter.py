@@ -16,8 +16,7 @@ from shutil import which, rmtree, copytree, copyfile
 from utils import *
 from svg2png import inkscape_convert_svg2png, magick_convert_svg2png
 
-# Configuration constants
-
+#region Configuration constants
 MIN_PYTHON_VERSION = (3, 6)  # Mainly for f-strings
 
 THEME_NAME = "Matter"
@@ -25,8 +24,6 @@ THEME_DESCRIPTION = (
     "Matter is a minimalist grub theme originally inspired by material design 2.\n"
     "Run this script without arguments for next steps on installing Matter."
 )
-
-
 
 if exists("/boot/grub"):
     BOOT_GRUB_PATH = "/boot/grub"
@@ -98,6 +95,7 @@ PALETTE = {
 AVAILABLE_COLORS = list(PALETTE.keys())
 
 MDI_CDN = "https://raw.githubusercontent.com/Templarian/MaterialDesign-SVG/master/svg/"
+#endregion
 
 # Global user arguments set in main()
 user_args: argparse.Namespace
@@ -110,23 +108,19 @@ def check_python_version():
     if installed < required:
         error(f"Python {required[0]}.{required[1]} or later required")
 
-
 def check_root_or_prompt():
     if os.geteuid() != 0:
         info("Request root access")
         exit_code = sh("sudo -v")
-        if exit_code != 0:
-            error("Could not verify root access, you could try with sudo")
+        if exit_code != 0: error("Could not verify root access, you could try with sudo")
         # Relaunch the program with sudo
         args = " ".join(sys.argv[1:])
         child_exit_code = sh(f"sudo {INSTALLER_DIR}/{INSTALLER_NAME} {args}")
         exit(child_exit_code)  # Propagate exit code
 
-
 def delete_dir(directory):
     if isdir(directory):
         rmtree(directory)
-
 
 def read_cleaned_grub_defaults():
     # Read previous defaults
@@ -142,7 +136,6 @@ def read_cleaned_grub_defaults():
     )
     return cleaned_grub_defaults
 
-
 def read_cleaned_grub_mkconfig():
     # Read previous defaults
     with open(GRUB_MKCONFIG_PATH, "r", newline="") as f:
@@ -156,7 +149,6 @@ def read_cleaned_grub_mkconfig():
         flags=re.DOTALL,
     )
     return cleaned_grub_mkconfig
-
 
 def download_icon(icon_name):
     info(f"Download {icon_name}.svg")
@@ -173,7 +165,6 @@ def download_icon(icon_name):
         f.write(response)
     return svg_path
 
-
 def get_converted_icons():
     return [
         filename[:-4]  # Remove .png
@@ -181,42 +172,58 @@ def get_converted_icons():
         if filename.endswith(".png")
     ]
 
-
 def is_icon_downloaded(icon_name):
     svg_path = ICON_SVG_PATHF.format(icon_name)
     return exists(svg_path)
 
-
-def convert_icon_svg2png(icon_name, whisper=False):
+def convert_icons_svg2png(whisper=False):
     if not has_command("inkscape"):
         if not has_command("convert"):
-            error(
-                "Stop. Both `inkscape` and `convert` command from imagemagick was not found",
-                "Consider installing `inkscape` for the best results",
-            )
-        else:
-            command = "convert"
+            error("Stop. Both `inkscape` and `convert` command from imagemagick was not found", "Consider installing `inkscape` for the best results")
+        else: command = "convert"
+    else: command = "inkscape"
+
+    if (user_args.all_icon_colors is not None) and (command == "inkscape"):
+        icons = []
+        colors = []
+        svg2png = inkscape_convert_svg2png
+
+        for _ in user_args.icons:
+            try: icons.index(_)
+            except ValueError: icons.append(_)
+
+        for _ in user_args.all_icon_colors:
+            try: colors.index(_)
+            except ValueError: colors.append(parse_color(_))
+
+        for _ in icons:
+            src_path = ICON_SVG_PATHF.format(_)
+            dst_path = ICON_PNG_PATHF.format(_)
+            info(f"Icon: {_}")
+            exit_code = svg2png(colors[icons.index(_)], src_path, dst_path, whisper=True)
+            if exit_code != 0: error(f"Stop. The `{command}` command returned an error")
     else:
-        command = "inkscape"
+        icons = []
 
-    color = (
-        parse_color(user_args.iconcolor)
-        if user_args.iconcolor
-        else parse_color(user_args.foreground)
-    )
-    src_path = ICON_SVG_PATHF.format(icon_name)
-    dst_path = ICON_PNG_PATHF.format(icon_name)
+        for _ in user_args.icons:
+            try: icons.index(_)
+            except ValueError: icons.append(_)
 
-    if command == "convert":
-        warning("Resulting icons could look a bit off, consider installing inkscape")
-        converter = magick_convert_svg2png
-    elif command == "inkscape":
-        converter = inkscape_convert_svg2png
+        for _ in icons:
+            src_path = ICON_SVG_PATHF.format(_)
+            dst_path = ICON_PNG_PATHF.format(_)
+            color = (
+                parse_color(user_args.iconcolor)
+                if user_args.iconcolor
+                else parse_color(user_args.foreground)
+            )
 
-    exit_code = converter(color, src_path, dst_path, whisper=whisper)
-    if exit_code != 0:
-        error(f"Stop. The `{command}` command returned an error")
+            if command == "convert": svg2png = magick_convert_svg2png
+            elif command == "inkscape": svg2png = inkscape_convert_svg2png
 
+            info(f"Icon: {_}")
+            exit_code = svg2png(color, src_path, dst_path, whisper=True)
+            if exit_code != 0: error(f"Stop. The `{command}` command returned an error")
 
 def get_available_fonts():
     "Returns the fonts present in /fonts"
@@ -226,7 +233,6 @@ def get_available_fonts():
         if filename.endswith(".ttf")
     ]
 
-
 def parse_color(color_string):
     if color_string in AVAILABLE_COLORS:
         color = PALETTE[color_string]
@@ -235,17 +241,15 @@ def parse_color(color_string):
     else:
         error(
             f"Invalid color parsed from {color_string}",
-            f"Color must be an hex code like C00FFE or one of: {AVAILABLE_COLORS}",
+            f"Color must be an hex code like C0FFEE or one of: {AVAILABLE_COLORS}",
         )
     return f"#{color}"
-
 
 def check_icon_converted(icon):
     available_icons = get_converted_icons()
     if icon not in available_icons + ["_"]:
         error(f"Invalid icon name: {icon}", f"Icons present are: {available_icons}")
     return icon
-
 
 def parse_font(font):
     """From a given --font check if available and return its font name
@@ -257,15 +261,12 @@ def parse_font(font):
         )
     return font.replace("_", " ")
 
-
 # Procedures
-
 
 def clean_install_dir():
     info("Clean install directory")
     if isdir(INSTALLATION_TARGET_DIR):
         rmtree(INSTALLATION_TARGET_DIR)
-
 
 def prepare_source_dir():
     info("Build theme from user preferences")
@@ -293,9 +294,7 @@ def prepare_source_dir():
         image_name = basename(image)
         copyfile(image, f"{INSTALLATION_SOURCE_DIR}/{image_name}")
         if user_args.background:
-            warning(
-                f"Both --background and --image arguments specified. Background color {background} will be ignored."
-            )
+            warning(f"Both --background and --image arguments specified. Background color {background} will be ignored.")
     else:
         image_name = "background.png"
 
@@ -304,10 +303,7 @@ def prepare_source_dir():
     entries = get_entry_names()
     # Do icon count match grub entry count?
     if len(icons) != len(entries):
-        error(
-            f"You must specify {len(entries)} icons ({len(icons)} provided) for entries:",
-            should_exit=False,
-        )
+        error(f"You must specify {len(entries)} icons ({len(icons)} provided) for entries:", should_exit=False)
         for i, m in enumerate(entries):
             print(f"{i + 1}. {m['entryname']}")
         exit(1)
@@ -324,10 +320,7 @@ def prepare_source_dir():
     elif not fontfile.endswith(".ttf"):  # font file is not ttf
         error(f"{fontfile} is not a .ttf file")
     elif fontname is None:  # User did, but did not gave its name
-        error(
-            "--fontname/-fn not specified for given font file.",
-            "e.g. 'Open Sans Regular'",
-        )
+        error("--fontname/-fn not specified for given font file.", "e.g. 'Open Sans Regular'")
     else:  # User specified a custom fontfile
         fontname = " ".join(fontname)  # e.g. Open Sans Regular
         dst_fontfile = f"{INSTALLER_DIR}/fonts/{fontname.replace(' ', '_')}.ttf"  # e.g. .../Open_Sans_Regular.ttf
@@ -344,24 +337,15 @@ def prepare_source_dir():
 
     # Convert icons
     info("Convert icons")
-    for i, icon in enumerate(icons):
-        if icon != "_":
-            if i == 0:
-                convert_icon_svg2png(icon)
-            else:
-                convert_icon_svg2png(icon, whisper=True)
+    convert_icons_svg2png()
 
     # Prepare Font
 
     # Generate font file
     info("Build font")
-    stdout = shout(
-        f"{grub_mkfont} -o {INSTALLATION_SOURCE_DIR}/font.pf2 {fontfile} -s {fontsize}"
-    )
+    stdout = shout(f"{grub_mkfont} -o {INSTALLATION_SOURCE_DIR}/font.pf2 {fontfile} -s {fontsize}")
     if stdout:
-        error(
-            f"{grub_mkfont} execution was not clean", f"for fontfile: {fontfile}",
-        )
+        error(f"{grub_mkfont} execution was not clean", f"for fontfile: {fontfile}")
 
     # Prepare Theme.txt
 
@@ -379,23 +363,19 @@ def prepare_source_dir():
     }
     parsed_theme = template.format(**context)
 
-    if image:
-        parsed_theme = parsed_theme.replace("# desktop-image", "desktop-image")
+    if image: parsed_theme = parsed_theme.replace("# desktop-image", "desktop-image")
 
     theme_file_path = f"{INSTALLATION_SOURCE_DIR}/theme.txt"
     with open(theme_file_path, "w") as f:
         f.write(parsed_theme)
 
-
 def prepare_target_dir():
     info("Prepare installation directory")
     clean_install_dir()
 
-
 def copy_source_to_target():
     info("Copy built theme to installation directory")
     copytree(INSTALLATION_SOURCE_DIR, INSTALLATION_TARGET_DIR)
-
 
 def update_grub_cfg():
     info("Update grub.cfg")
@@ -409,7 +389,6 @@ def update_grub_cfg():
     command = f"{update_command} -o {GRUB_CFG_PATH}"
     info(f"Remake grub.cfg with {command}")
     sh(command)
-
 
 def update_grub_defaults():
     info(f"Patch {GRUB_DEFAULTS_PATH} with {THEME_OVERRIDES_TITLE}")
@@ -429,13 +408,11 @@ def update_grub_defaults():
     with open(GRUB_DEFAULTS_PATH, "w") as f:
         f.write(grub_configs)
 
-
 def clean_grub_defaults():
     info(f"Clean {THEME_OVERRIDES_TITLE} from {GRUB_DEFAULTS_PATH}")
     cleaned_grub_defaults = read_cleaned_grub_defaults()
     with open(GRUB_DEFAULTS_PATH, "w") as f:
         f.write(cleaned_grub_defaults)
-
 
 def clean_grub_mkconfig():
     info(f"Clean {THEME_OVERRIDES_TITLE} from {GRUB_MKCONFIG_PATH}")
@@ -443,13 +420,11 @@ def clean_grub_mkconfig():
     with open(GRUB_MKCONFIG_PATH, "w") as f:
         f.write(cleaned_grub_mkconfig)
 
-
 def clean_hookcheck():
     info(f"Remove hookcheck script from {GRUB_SCRIPTS_PATH}")
     hookcheck = f"{GRUB_SCRIPTS_PATH}/99_matter"
     if exists(hookcheck):
         os.remove(hookcheck)
-
 
 def get_entry_names():
     "Gets the entry names from grub.cfg contents"
@@ -466,9 +441,7 @@ def get_entry_names():
     matches = list(matchiter)
     return matches
 
-
 # Main procedures
-
 
 def do_preinstall_hint():
     info(
@@ -486,7 +459,6 @@ def do_preinstall_hint():
     info("Example (with 8 entries, _ means ignore):")
     info("./matter.py -i ubuntu microsoft-windows folder _ _ _ _ cog")
 
-
 def do_test():
     info("Begin grub2-theme-preview")
     warning(
@@ -501,11 +473,10 @@ def do_test():
         )
     sh(f"grub2-theme-preview {INSTALLATION_SOURCE_DIR}")
 
-
 def do_install():
+    check_root_or_prompt()
     info(f"Begin {THEME_NAME} install")
     prepare_source_dir()
-    check_root_or_prompt()
     prepare_target_dir()
     copy_source_to_target()
     update_grub_defaults()
@@ -513,7 +484,6 @@ def do_install():
     install_hookcheck()
     update_grub_cfg()
     info(f"{THEME_NAME} successfully installed")
-
 
 def do_uninstall():
     info(f"Begin {THEME_NAME} uninstall")
@@ -525,7 +495,6 @@ def do_uninstall():
     update_grub_cfg()
     info(f"{THEME_NAME} successfully uninstalled")
 
-
 def do_list_grub_cfg_entries():
     # Read current grub cfg
     with open(GRUB_CFG_PATH, "r", newline="") as f:
@@ -535,7 +504,6 @@ def do_list_grub_cfg_entries():
 
     for i, m in enumerate(entries):
         print(f"{i + 1}. {m['entryname']}")
-
 
 def create_config_file():
     icons = user_args.icons
@@ -553,7 +521,6 @@ def create_config_file():
 
     with open(CONFIG_FILE_PATH, 'w') as f:
         f.write(json.dumps(config))
-
 
 def patch_from_config_file():
     # Read current grub cfg
@@ -578,9 +545,7 @@ def patch_from_config_file():
 
     do_patch_grub_cfg_icons(icons)
 
-
 def do_patch_grub_cfg_icons(icons):
-
     info(f"Begin {GRUB_CFG_PATH} patch")
     with open(GRUB_CFG_PATH, "r", newline="") as f:
         grub_cfg = f.read()
@@ -605,9 +570,7 @@ def do_patch_grub_cfg_icons(icons):
 
     info(f"{len(icons)} icons successfully patched onto {GRUB_CFG_PATH}")
 
-
 def do_set_icons(patch_grubcfg):
-
     icons = user_args.icons
 
     if icons is None:
@@ -657,10 +620,7 @@ def do_set_icons(patch_grubcfg):
         with open(GRUB_MKCONFIG_PATH, "w") as f:
             f.write(new_grub_mkconfig)
 
-        info(
-            f"{GRUB_MKCONFIG_PATH} successfully patched, icons will now persist between grub updates."
-        )
-
+        info(f"{GRUB_MKCONFIG_PATH} successfully patched, icons will now persist between grub updates.")
 
 def install_hookcheck():
     info(f"Create hook check script")
@@ -690,9 +650,7 @@ def install_hookcheck():
     st = os.stat(script_file_path)
     os.chmod(script_file_path, st.st_mode | 0o111)
 
-
 # Script arguments
-
 
 def parse_args():
     parser = ArgumentParser(
@@ -808,33 +766,42 @@ def parse_args():
         action="store_true",
         help="set grub entries icons using config file. "
     )
+    parser.add_argument(
+      "--all-icon-colors",
+      "-aic",
+      nargs="*",
+      help="specify a color for every icon"
+    )
     return parser.parse_args()
 
+# if __name__ == "__main__":
+#     try:
+#         check_python_version()
+#         user_args = parse_args()
+
+#         if user_args.listentries:
+#             do_list_grub_cfg_entries()
+#         elif user_args.buildonly:
+#             prepare_source_dir()
+#         elif user_args.seticons_once:
+#             do_set_icons(patch_grubcfg=False)
+#         elif user_args.seticons:
+#             do_set_icons(patch_grubcfg=True)
+#         elif user_args.uninstall:
+#             do_uninstall()
+#         elif user_args.configicons:
+#             patch_from_config_file()
+#         elif user_args.icons is None:
+#             do_preinstall_hint()
+#         else:
+#             do_install()
+
+#         if user_args.test:
+#                 do_test()
+#     except KeyboardInterrupt:
+#         error("Stop. Script halted by user")
+#         sys.exit(1)
 
 if __name__ == "__main__":
-    try:
-        check_python_version()
-        user_args = parse_args()
-
-        if user_args.listentries:
-            do_list_grub_cfg_entries()
-        elif user_args.buildonly:
-            prepare_source_dir()
-        elif user_args.seticons_once:
-            do_set_icons(patch_grubcfg=False)
-        elif user_args.seticons:
-            do_set_icons(patch_grubcfg=True)
-        elif user_args.uninstall:
-            do_uninstall()
-        elif user_args.configicons:
-            patch_from_config_file()
-        elif user_args.icons is None:
-            do_preinstall_hint()
-        else:
-            do_install()
-
-        if user_args.test:
-                do_test()
-    except KeyboardInterrupt:
-        error("Stop. Script halted by user")
-        sys.exit(1)
+    user_args = parse_args()
+    prepare_source_dir()
