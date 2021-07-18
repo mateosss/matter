@@ -25,20 +25,20 @@ def color_string(string, fg=None):
     return f"{COLORS.get(fg, '')}{string}{endcolor}"
 
 
-def info(*lines):
+def info(*lines, **kwargs):
     for line in lines:
-        print(f"{color_string('[I] ', fg='cyan')}{line}")
+        print(f"{color_string('[I] ', fg='cyan')}{line}", **kwargs)
 
 
-def error(*lines, should_exit=True):
+def error(*lines, should_exit=True, **kwargs):
     for line in lines:
-        print(f"{color_string('[E] ', fg='lightred')}{line}")
+        print(f"{color_string('[E] ', fg='lightred')}{line}", **kwargs)
     if should_exit:
         exit(1)
 
-def warning(*lines):
+def warning(*lines, **kwargs):
     for line in lines:
-        print(f"{color_string('[W] ', fg='yellow')}{line}")
+        print(f"{color_string('[W] ', fg='yellow')}{line}", **kwargs)
 
 
 # Shell / external utils
