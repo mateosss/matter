@@ -176,7 +176,7 @@ def is_icon_downloaded(icon_name):
     svg_path = ICON_SVG_PATHF.format(icon_name)
     return exists(svg_path)
 
-def convert_icons_svg2png(whisper=False):
+def convert_icons_svg2png():
     if not has_command("inkscape"):
         if not has_command("convert"):
             error("Stop. Both `inkscape` and `convert` command from imagemagick was not found", "Consider installing `inkscape` for the best results")
@@ -191,10 +191,13 @@ def convert_icons_svg2png(whisper=False):
         for _ in user_args.icons:
             try: icons.index(_)
             except ValueError: icons.append(_)
+        print(icons)
 
         for _ in user_args.all_icon_colors:
-            try: colors.index(_)
-            except ValueError: colors.append(parse_color(_))
+            color = parse_color(_)
+            try: colors.index(color)
+            except ValueError: colors.append(color)
+        print(colors)
 
         for _ in icons:
             src_path = ICON_SVG_PATHF.format(_)
@@ -202,6 +205,8 @@ def convert_icons_svg2png(whisper=False):
             info(f"Icon: {_}")
             exit_code = svg2png(colors[icons.index(_)], src_path, dst_path, whisper=True)
             if exit_code != 0: error(f"Stop. The `{command}` command returned an error")
+        print(icons)
+        print(colors)
     else:
         icons = []
 
