@@ -8,6 +8,7 @@ import xml.dom.minidom
 # Local Matter modules
 from utils import sh, shout, error
 
+
 def inkscape_convert_svg2png(color, src_path, dst_path, whisper=False):
     # SVG_URI = "http://www.w3.org/2000/svg"
     FRAC = 0.6
@@ -98,6 +99,7 @@ def inkscape_convert_svg2png(color, src_path, dst_path, whisper=False):
     os.remove(TEMPFILE)
     return exit_code
 
+
 def magick_convert_svg2png(color, src_path, dst_path, whisper=None):
     cmd = (
         r"convert -trim -scale 36x36 -extent 72x72 -gravity center "
@@ -106,6 +108,7 @@ def magick_convert_svg2png(color, src_path, dst_path, whisper=None):
         rf"{src_path} {dst_path}"
     )
     return os.system(cmd)
+
 
 # For demostration purposes
 if __name__ == "__main__":

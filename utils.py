@@ -24,6 +24,7 @@ def color_string(string, fg=None):
     endcolor = "\033[0m"
     return f"{COLORS.get(fg, '')}{string}{endcolor}"
 
+
 def info(*lines, **kwargs):
     for line in lines:
         print(f"{color_string('[I] ', fg='cyan')}{line}", **kwargs)
@@ -38,11 +39,14 @@ def warning(*lines, **kwargs):
     for line in lines:
         print(f"{color_string('[W] ', fg='yellow')}{line}", **kwargs)
 
+
 # Shell / external utils
+
 
 def sh(command):
     "Executes command in shell and returns its exit status"
     return run(command, shell=True).returncode
+
 
 def shout(command, silence=False):
     "Executes command in shell and returns its stdout"
@@ -50,6 +54,7 @@ def shout(command, silence=False):
     if not silence:
         print(stdout)
     return stdout
+
 
 def has_command(command):
     return which(command) is not None
