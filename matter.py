@@ -211,6 +211,12 @@ def convert_icon_svg2png():
             if color != "_":
                 colors.append(color)
 
+        if len(icons) != len(colors):
+            error(
+                "You need select a color for all icons,",
+                "there's one or more color missing"
+            )
+
         svg2png = inkscape_convert_svg2png
 
         for icon in icons:
@@ -222,21 +228,20 @@ def convert_icon_svg2png():
             if exit_code != 0: error(f"Stop. The `{svg2png}` command returned an error")
         
     else:
-        icons = [
-            filename[:-4]
-            for filename in os.listdir(f"icons/")
-            if (filename[:-4] in user_args.icons)
-            if (filename.endswith(".svg"))
-        ]
+        icons = []
+        for icon in user_args.icons:
+            if icon not in icons:
+                icons.append(icon)
+
+        color = (
+            parse_color(user_args.iconcolor)
+            if user_args.iconcolor
+            else parse_color(user_args.foreground)
+        )
 
         for icon in icons:
             src_path = ICON_SVG_PATHF.format(icon)
             dst_path = ICON_PNG_PATHF.format(icon)
-            color = (
-                parse_color(user_args.iconcolor)
-                if user_args.iconcolor
-                else parse_color(user_args.foreground)
-            )
 
             if svg2png == "convert": svg2png = magick_convert_svg2png
             elif svg2png == "inkscape": svg2png = inkscape_convert_svg2png
