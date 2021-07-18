@@ -107,7 +107,6 @@ def magick_convert_svg2png(color, src_path, dst_path, whisper=None):
     )
     return os.system(cmd)
 
-
 # For demostration purposes
 if __name__ == "__main__":
     svg2png = inkscape_convert_svg2png
