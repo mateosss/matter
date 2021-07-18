@@ -201,17 +201,18 @@ def convert_icon_svg2png():
         command = "inkscape"
     
     if (user_args.all_icon_colors is not None) and (command == "inkscape"):
-        icons = [
-            filename[:-4]
-            for filename in os.listdir(f"icons/")
-            if (filename[:-4] in user_args.icons)
-            if (filename.endswith(".svg"))
-        ]
-        colors = check_colors()
+        icons = []
+        for icon in user_args.icons:
+            if icon not in icons:
+                icons.append(icon)
+        
+        colors = []
+        for color in check_colors():
+            if color != "_":
+                colors.append(color)
 
         svg2png = inkscape_convert_svg2png
 
-        #? Converting Icons
         for icon in icons:
             src_path = ICON_SVG_PATHF.format(icon)
             dst_path = ICON_PNG_PATHF.format(icon)
@@ -219,7 +220,7 @@ def convert_icon_svg2png():
             info(f"Icon: {icon}")
             exit_code = svg2png(colors[icons.index(icon)], src_path, dst_path, whisper=True)
             if exit_code != 0: error(f"Stop. The `{svg2png}` command returned an error")
-
+        
     else:
         icons = [
             filename[:-4]
