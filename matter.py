@@ -774,34 +774,30 @@ def parse_args():
     )
     return parser.parse_args()
 
-# if __name__ == "__main__":
-#     try:
-#         check_python_version()
-#         user_args = parse_args()
-
-#         if user_args.listentries:
-#             do_list_grub_cfg_entries()
-#         elif user_args.buildonly:
-#             prepare_source_dir()
-#         elif user_args.seticons_once:
-#             do_set_icons(patch_grubcfg=False)
-#         elif user_args.seticons:
-#             do_set_icons(patch_grubcfg=True)
-#         elif user_args.uninstall:
-#             do_uninstall()
-#         elif user_args.configicons:
-#             patch_from_config_file()
-#         elif user_args.icons is None:
-#             do_preinstall_hint()
-#         else:
-#             do_install()
-
-#         if user_args.test:
-#                 do_test()
-#     except KeyboardInterrupt:
-#         error("Stop. Script halted by user")
-#         sys.exit(1)
-
 if __name__ == "__main__":
-    user_args = parse_args()
-    prepare_source_dir()
+    try:
+        check_python_version()
+        user_args = parse_args()
+
+        if user_args.listentries:
+            do_list_grub_cfg_entries()
+        elif user_args.buildonly:
+            prepare_source_dir()
+        elif user_args.seticons_once:
+            do_set_icons(patch_grubcfg=False)
+        elif user_args.seticons:
+            do_set_icons(patch_grubcfg=True)
+        elif user_args.uninstall:
+            do_uninstall()
+        elif user_args.configicons:
+            patch_from_config_file()
+        elif user_args.icons is None:
+            do_preinstall_hint()
+        else:
+            do_install()
+
+        if user_args.test:
+                do_test()
+    except KeyboardInterrupt:
+        error("Stop. Script halted by user")
+        sys.exit(1)
