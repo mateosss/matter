@@ -370,6 +370,6 @@ please create an issue with it! I would love to see your results.
 
 # Thanks
 
-- Original theme based on <https://github.com/vinceliuice/grub2-themes>
+- Originally inspired by <https://github.com/vinceliuice/grub2-themes>
 - Icons from <https://materialdesignicons.com/>
 - Fonts mainly from <https://fonts.google.com>
