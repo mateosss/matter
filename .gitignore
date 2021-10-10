@@ -1,6 +1,8 @@
 .vscode
 Matter/icons/*.png
 Matter/font.pf2
+Matter/theme.txt
 icons/*.svg
 fonts/*.ttf
 __pycache__
+config.json
