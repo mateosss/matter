@@ -45,7 +45,9 @@ Matter will inform you of any missing dependencies, but here is a list anyways:
 - `grub-mkconfig` and `grub-mkfont`: General grub utilities needed. If you
   don't have these, please create an issue with more information about your
   system as I've only worked with ones that have these commands.
-- `PIL`: An python imaging library. You can install it with `pip install Pillow` or look at your package manager (`python3-pil` for Ubuntu based systems, `python-pillow` for arch derivates)
+- `PIL` (Optional): For image conversions with the `--downloadbackground/-dlbg`
+  option. Can be installed with either of: `pip install Pillow`, `sudo apt
+  install python3-pil` (Ubuntu), `pacman -S python-pillow` (Arch).
 - [`grub2-theme-preview`](https://github.com/hartwork/grub2-theme-preview)
   (Optional): For testing results (`--test/-t` argument) without rebooting.
 
