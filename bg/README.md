@@ -1,0 +1,1 @@
+The background images you choose for the --downloadbackground option will be saved to this folder.

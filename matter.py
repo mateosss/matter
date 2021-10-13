@@ -11,6 +11,7 @@ from urllib.error import HTTPError, URLError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from os.path import dirname, basename, isdir, exists
 from shutil import which, rmtree, copytree, copyfile
+from PIL import Image
 
 # Local Matter modules
 from utils import *
@@ -66,6 +67,9 @@ END_THEME_OVERRIDES = f"### END {THEME_OVERRIDES_TITLE}"
 
 ICON_SVG_PATHF = f"{INSTALLER_DIR}/icons/{{}}.svg"
 ICON_PNG_PATHF = f"{INSTALLATION_SOURCE_DIR}/icons/{{}}.png"
+
+BACKGROUND_TMP_PATHF = f"{INSTALLER_DIR}/bg/{{}}.tmp"
+BACKGROUND_PNG_PATHF = f"{INSTALLER_DIR}/bg/{{}}.png"
 
 CONFIG_FILE_PATH = f"{INSTALLER_DIR}/config.json"
 
@@ -174,6 +178,26 @@ def download_icon(icon_name):
     return svg_path
 
 
+def download_background(background_path):
+    info(f"Downloading background image")
+    url = f"{background_path}"
+    try:
+        with request.urlopen(url) as f:
+            response = f.read()
+    except HTTPError as err:  # A subclass of URLError
+        error(f"Couldn't get background image  ({err.reason})", f"At URL {err.geturl()}")
+    except URLError as err:
+        error(f"Couldn't get background image ({err.reason})")
+    bg_path = BACKGROUND_TMP_PATHF.format('background_image')
+    conv_path = BACKGROUND_PNG_PATHF.format('background_image')
+    with open(bg_path, "wb") as f:
+        f.write(response)
+    im = Image.open(bg_path)
+    im.save(conv_path)
+    return conv_path
+
+
+
 def get_converted_icons():
     return [
         filename[:-4]  # Remove .png
@@ -277,7 +301,11 @@ def prepare_source_dir():
         if user_args.background is None
         else user_args.background
     )
-    image = user_args.image
+    image = (
+        user_args.image
+        if user_args.downloadbackground is None
+        else download_background(user_args.downloadbackground)
+    )
     fontkey = user_args.font
     fontfile = user_args.fontfile
     fontname = user_args.fontname
@@ -807,6 +835,12 @@ def parse_args():
         "-ci",
         action="store_true",
         help="set grub entries icons using config file. "
+    )
+    parser.add_argument(
+        "--downloadbackground",
+        "-dlbg",
+        type=str,
+        help=f"download the background image from the given url",
     )
     return parser.parse_args()
 
