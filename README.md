@@ -45,6 +45,7 @@ Matter will inform you of any missing dependencies, but here is a list anyways:
 - `grub-mkconfig` and `grub-mkfont`: General grub utilities needed. If you
   don't have these, please create an issue with more information about your
   system as I've only worked with ones that have these commands.
+- `PIL`: An python imaging library. You can install it with `pip install Pillow` or look at your package manager (`python3-pil` for Ubuntu based systems, `python-pillow` for arch derivates)
 - [`grub2-theme-preview`](https://github.com/hartwork/grub2-theme-preview)
   (Optional): For testing results (`--test/-t` argument) without rebooting.
 
@@ -166,6 +167,12 @@ Here is an example of the syntax:
 
 ```sh
 ./matter.py -im ~/Pictures/some-cool-image-that-has-good-contrast-with-my-text-color.png
+```
+
+You can also specify an URL with --downloadbackground/-dlbg to automatically download an image from the internet. The image will be converted to png so it doesn't need to be a grub-compatible 8-bit jpg. It should be in the `jpg` or `png` format though. This feature is also considered *unfinished*.
+
+```sh
+./matter.py -dlbg "https://source.unsplash.com/1920x1080/?nature"
 ```
 
 ## Testing Without Rebooting
