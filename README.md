@@ -75,6 +75,19 @@ or if you want to help out with fedora support*
 
 </details>
 
+<details>
+
+<summary>Note for users with screen resolution other than 1920x1080 (click to show)</summary>
+
+*Matter layout might break in other resolutions with the default installation,
+you might need to tweak the [`grub.template`](grub.template) `GRUB_GFXMODE`
+property and [`theme.txt.template`](theme.txt.template) percentages*
+
+*See [this issue](https://github.com/mateosss/matter/issues/4) for more
+information.*
+
+</details>
+
 Following is a Matter installation with default values. Don't worry, it is very
 easy to rollback or overwrite this installation later if you want to.
 
