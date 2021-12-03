@@ -233,6 +233,7 @@ inspired from.
 ## Example 1
 
 ![Example 1](.docs/gallery1.gif)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmateosss%2Fmatter.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmateosss%2Fmatter?ref=badge_shield)
 
 *Font: [Josefin Sans Regular
 400](https://fonts.google.com/specimen/Josefin+Sans)*
@@ -395,3 +396,7 @@ please create an issue with it! I would love to see your results.
 - Originally inspired by <https://github.com/vinceliuice/grub2-themes>
 - Icons from <https://materialdesignicons.com/>
 - Fonts mainly from <https://fonts.google.com>
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fmateosss%2Fmatter.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fmateosss%2Fmatter?ref=badge_large)
