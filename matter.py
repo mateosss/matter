@@ -174,7 +174,7 @@ def download_icon(icon_name):
         with request.urlopen(url) as f:
             response = f.read()
     except HTTPError as err:  # A subclass of URLError
-        error(f"Couldn't get icon {icon_name} ({err.reason}) at URL {err.geturl()}")
+        error(f"Couldn't get icon {icon_name} ({err.reason})", f"At URL {err.geturl()}")
     except URLError as err:
         error(f"Couldn't get icon {icon_name} ({err.reason})")
     svg_path = ICON_SVG_PATHF.format(icon_name)
@@ -193,7 +193,7 @@ def download_background(background_path):
         with request.urlopen(url) as f:
             response = f.read()
     except HTTPError as err:  # A subclass of URLError
-        error(f"Couldn't get background image ({err.reason}) at URL {err.geturl()}")
+        error(f"Couldn't get background image ({err.reason})", f"At URL {err.geturl()}")
     except URLError as err:
         error(f"Couldn't get background image ({err.reason})")
     bg_path = BACKGROUND_TMP_PATHF.format('background_image')
@@ -223,7 +223,7 @@ def convert_icon_svg2png(icon_name, whisper=False):
     if not has_command("inkscape"):
         if not has_command("convert"):
             error(
-                "Stop. Both `inkscape` and `convert` command from imagemagick was not found",
+                "Stop. Both `inkscape` and `convert` command from imagemagick were not found",
                 "Consider installing `inkscape` for the best results",
             )
         else:
