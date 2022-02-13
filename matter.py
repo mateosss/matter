@@ -11,7 +11,12 @@ from urllib.error import HTTPError, URLError
 from argparse import ArgumentParser, RawTextHelpFormatter
 from os.path import dirname, basename, isdir, exists
 from shutil import which, rmtree, copytree, copyfile
-from PIL import Image
+try:
+    from PIL import Image
+except:
+    has_PIL = False
+else:
+    has_PIL = True
 
 # Local Matter modules
 from utils import *
@@ -169,7 +174,7 @@ def download_icon(icon_name):
         with request.urlopen(url) as f:
             response = f.read()
     except HTTPError as err:  # A subclass of URLError
-        error(f"Couldn't get icon {icon_name} ({err.reason})", f"At URL {err.geturl()}")
+        error(f"Couldn't get icon {icon_name} ({err.reason}) at URL {err.geturl()}")
     except URLError as err:
         error(f"Couldn't get icon {icon_name} ({err.reason})")
     svg_path = ICON_SVG_PATHF.format(icon_name)
@@ -179,13 +184,16 @@ def download_icon(icon_name):
 
 
 def download_background(background_path):
+    if not has_PIL:
+        error("PIL not detected, cannot download background")
     info(f"Downloading background image")
+    
     url = f"{background_path}"
     try:
         with request.urlopen(url) as f:
             response = f.read()
     except HTTPError as err:  # A subclass of URLError
-        error(f"Couldn't get background image  ({err.reason})", f"At URL {err.geturl()}")
+        error(f"Couldn't get background image ({err.reason}) at URL {err.geturl()}")
     except URLError as err:
         error(f"Couldn't get background image ({err.reason})")
     bg_path = BACKGROUND_TMP_PATHF.format('background_image')
@@ -505,7 +513,7 @@ def do_preinstall_hint():
         f"{color_string('Grub Theme'.upper(), fg='lightcyan')}"
         f"{color_string(' ]', fg='brightwhite')}"
     )
-    info("Argument -i required. Which icons go to which grub entries?.")
+    info("Argument -i required. Which icons go to which grub entries?")
     info("Your grub entries are:")
     do_list_grub_cfg_entries()
     info("Look for icons you like at https://materialdesignicons.com/")
