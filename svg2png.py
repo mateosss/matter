@@ -50,10 +50,7 @@ def inkscape_convert_svg2png(color, src_path, dst_path, whisper=False):
         ET.register_namespace(key, value)
 
     root = dom.getroot()
-    width, height = (
-        int_ignore_units(root.attrib["width"]),
-        int_ignore_units(root.attrib["height"]),
-    )
+    _, _, width, height = map(int, filter(bool, re.split(r'[ ,]', root.attrib["viewBox"])))
     width_gap, height_gap = (1 - FRAC) * width / 2, (1 - FRAC) * height / 2
 
     # Group all elements that are children of <svg> while changing their 'style' attributes
